@@ -10,7 +10,7 @@ Before using any of the commands you will need to run Set-OTSConnectionInformati
 
 ## Build
 
-- Clone the repositor and run `build.ps1`
+- Clone the repository and run `build.ps1`
 - Import-Module Release\OneTimeSecret\OneTimeSecret.psd1
 - View public commands provided by the module with `Get-Command -Module OneTimeSecret`
 
