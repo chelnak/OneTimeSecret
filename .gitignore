@@ -1,0 +1,5 @@
+# Don't checkin the Release output dir.
+Release/
+
+#Ignore Variables.json
+tests/Variables.json
