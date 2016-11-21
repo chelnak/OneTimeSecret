@@ -2,4 +2,4 @@
 Release/
 
 #Ignore Variables.json
-tests/Variables.json
+test/Variables.json
