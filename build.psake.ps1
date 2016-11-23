@@ -261,7 +261,7 @@ Task GenerateMarkdown -requiredVariables DefaultLocale, DocsRootDir, ModuleName,
 
         # ErrorAction set to SilentlyContinue so this command will not overwrite an existing MD file.
         New-MarkdownHelp -Module $ModuleName -Locale $DefaultLocale -OutputFolder $DocsRootDir\$DefaultLocale `
-                         -WithModulePage -ErrorAction SilentlyContinue -Verbose:$VerbosePreference > $null
+                         -NoMetadata -ErrorAction SilentlyContinue -Verbose:$VerbosePreference > $null
     }
     finally {
         Remove-Module $ModuleName
