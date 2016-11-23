@@ -31,7 +31,7 @@ function Get-OTSSecretMetadata {
     )
 
     # --- Set URI with mandatory query parameters
-    $URI = "/v1/private/$MetadataKey"
+    $URI = "/v1/private/$($MetadataKey)"
 
     try {
 

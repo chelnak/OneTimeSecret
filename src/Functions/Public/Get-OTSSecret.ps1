@@ -37,7 +37,7 @@ function Get-OTSSecret {
     )
 
     # --- Set URI with mandatory query parameters
-    $URI = "/v1/secret/$SecretKey"
+    $URI = "/v1/secret/$($SecretKey)"
 
     try {
 
