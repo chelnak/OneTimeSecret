@@ -32,18 +32,13 @@ function Set-OTSConnectionInformation {
 
         [Parameter(Mandatory=$true, Position=1)]
         [ValidateNotNullOrEmpty()]
-        [String]$APIKey,
-
-        [Parameter(Position=2)]
-        [Switch]$Persistent
-
+        [String]$APIKey
 
     )
 
-
     if ($PSCmdlet.ShouldProcess("onetimesecret.com")){
 
-        $EncodedAuth = [System.Text.Encoding]::UTF8.GetBytes("$($Username):$($Password)")
+        $EncodedAuth = [System.Text.Encoding]::UTF8.GetBytes("$($Username):$($APIKey)")
 
         $Global:OTSConnectionInfomation = [PSCustomObject]@{
 
