@@ -52,7 +52,7 @@ function Invoke-OTSRestMethod {
 
 
     # --- Test for connection variable
-    if (!(Get-Variable -Name OTSConnectionInfomation -Scope Global)) {
+    if (!(Get-Variable -Name OTSConnectionInfomation -Scope Global -ErrorAction SilentlyContinue)) {
 
         throw "Could not find OTSConnectionInfomation. Please run Set-OTSConnectionInformation first"
 
