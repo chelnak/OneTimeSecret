@@ -1,10 +1,19 @@
-[System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '', Scope='*', Target='SuppressImportModule')]
 $SuppressImportModule = $false
-. $PSScriptRoot\Shared.ps1
+$ModuleManifestName = 'OneTimeSecret.psd1'
+$ModuleManifestPath = "$PSScriptRoot\..\src\$ModuleManifestName"
+
+if (!$SuppressImportModule) {
+    # -Scope Global is needed when running tests from inside of psake, otherwise
+    # the module's functions cannot be found in the OneTimeSecret\ namespace
+    Import-Module $ModuleManifestPath -Scope Global
+}
+
+# Get test variables
+$Variables = Get-Content -Path $PSScriptRoot\Variables.json -Raw | ConvertFrom-Json
 
 Describe 'Module Manifest Tests' {
 
-    It 'Passes Test-ModuleManifest' {
+    It 'Test-ModuleManifest' {
 
         Test-ModuleManifest -Path $ModuleManifestPath
         $? | Should Be $true
@@ -17,40 +26,82 @@ Describe -Name 'Module Function Tests' {
 
     Context -Name "Public Functions" -Fixture {
 
-        It -Name "Connection Tests" -Test {
+        # --- CREATE
+        It -Name "Create Authorization" -Test {
 
            $Connection = Set-OTSConnectionInformation -Username $Variables.Username -APIKey $Variables.APIKey
            $Connection.Authorization | Should Not Be $null
 
         }
 
-        It -Name "Return System Status" -Test {
-
-
-        }
-
-        It -Name "Return Recent Metadata" -Test {
-
-
-        }
-
-        It -Name "Return Secret" -Test {
-
-
-        }
-
-        It -Name "Return Secret Metadata" -Test {
-
-
-        }
-
         It -Name "Create Secret" -Test {
 
+            $Param = @{
+
+                Passphrase = $Variables.Passphrase
+                Recipient = $Variables.Recipient
+                Ttl = $Variables.Ttl
+                MetadataTtl = $Variables.MetadataTtl
+                SecretTtl = $Variables.SecretTtl
+            }
+
+            $Secret = New-OTSSecret @Param
+            $ReturnedSecret = Get-OTSSecret -SecretKey $Secret.SecretKey -Passphrase $Variables.Passphrase
+            $ReturnedSecret.SecretKey | Should Be $Secret.SecretKey
 
         }
 
         It -Name "Create Shared Secret" -Test {
 
+            $Param = @{
+
+                Secret = $Variables.Secret
+                Passphrase = $Variables.Passphrase
+                Ttl = $Variables.Ttl
+                Recipient = $Variables.Recipient
+
+            }
+
+            $Secret = New-OTSSharedSecret @Param
+            $ReturnedMetadata = Get-OTSSecretMetadata -MetadataKey $Secret.MetadataKey
+            $ReturnedMetadata.SecretKey | Should Be $Secret.SecretKey
+
+        }
+
+        # --- READ
+        It -Name "Return Secret" -Test {
+
+            $Secret = New-OTSSecret -Passphrase $Variables.Passphrase
+            $ReturnedSecret = Get-OTSSecret -SecretKey $Secret.SecretKey -Passphrase $Variables.Passphrase
+            $ReturnedSecret.SecretKey | Should Be $Secret.SecretKey
+
+        }
+
+        It -Name "Return Secret Metadata" -Test {
+
+            $Secret = New-OTSSecret -Passphrase $Variables.Passphrase
+            $ReturnedMetadata = Get-OTSSecretMetadata -MetadataKey $Secret.MetadataKey
+            $ReturnedMetadata.SecretKey | Should Be $Secret.SecretKey
+
+        }
+
+        It -Name "Return Recent Metadat Should Fail" -Test {
+
+            try {
+
+                $RecentMetadata = Get-OTSRecentMetadata
+
+            } catch {}
+
+
+            $RecentMetadata | Should Be $null
+
+        }
+
+        It -Name "Return System Status" -Test {
+
+            $Status = Get-OTSSystemStatus
+            $Status.Status | Should Be "nominal"
 
         }
 
