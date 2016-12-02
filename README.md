@@ -1,3 +1,5 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/qbhbapqr9xt24413?svg=true)](https://ci.appveyor.com/project/chelnak/onetimesecret)
+
 #OneTimeSecret
 
 A PowerShell module for OneTimeSecret.com
