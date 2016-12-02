@@ -9,5 +9,4 @@ init:
 install:
   - ps: Install-Module -Name Psake, Pester, PSScriptAnalyzer, PlatyPS -Force
 test_script:
-  - ps: .\build.ps1 -Task Analyze
-  - ps: Get-Variable
+  - ps: .\build.ps1 -Task Test
