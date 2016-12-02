@@ -1,9 +1,3 @@
----
-external help file: OneTimeSecret-help.xml
-online version: 
-schema: 2.0.0
----
-
 # New-OTSSharedSecret
 
 ## SYNOPSIS

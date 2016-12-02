@@ -1,9 +1,3 @@
----
-external help file: OneTimeSecret-help.xml
-online version:
-schema: 2.0.0
----
-
 # Set-OTSConnectionInformation
 
 ## SYNOPSIS
@@ -12,7 +6,7 @@ Create the Authorization information required to interact with the OneTimeSecret
 ## SYNTAX
 
 ```
-Set-OTSConnectionInformation [-Username] <String> [-APIKey] <String> [-Persistent] [-WhatIf] [-Confirm]
+Set-OTSConnectionInformation [-Username] <String> [-APIKey] <String> [-WhatIf] [-Confirm]
 ```
 
 ## DESCRIPTION
@@ -22,7 +16,7 @@ Create the Authorization information required to interact with the OneTimeSecret
 
 ### -------------------------- EXAMPLE 1 --------------------------
 ```
-Set-OTSConnectionInformation -Username craiggumbley@gmail.com -Password 52302xxxxff2e799aea33cbc7c85896b4c6a6997
+Set-OTSConnectionInformation -Username craiggumbley@gmail.com -Password 52302308eff2e799aea33cbc7c85896b4c6a6997
 ```
 
 ## PARAMETERS
@@ -33,7 +27,7 @@ The Username of the account
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases:
+Aliases: 
 
 Required: True
 Position: 1
@@ -48,26 +42,11 @@ The API key for the account
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases:
+Aliases: 
 
 Required: True
 Position: 2
 Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Persistent
-{{Fill Persistent Description}}
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 3
-Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

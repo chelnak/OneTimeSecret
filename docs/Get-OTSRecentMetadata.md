@@ -1,35 +1,29 @@
----
-external help file: OneTimeSecret-help.xml
-online version: 
-schema: 2.0.0
----
-
-# Get-OTSSystemStatus
+# Get-OTSRecentMetadata
 
 ## SYNOPSIS
-Get the current status of OneTimeSecret.com
+Return recent secret metadata
 
 ## SYNTAX
 
 ```
-Get-OTSSystemStatus
+Get-OTSRecentMetadata
 ```
 
 ## DESCRIPTION
-Get the current status of OneTimeSecret.com
+Return recent secret metadata
+
+This function will not currently work due to an error with the OneTimeSecret.com API
 
 ## EXAMPLES
 
 ### -------------------------- EXAMPLE 1 --------------------------
 ```
-Get-OTSSystemStatus
+Get-OTSRecentMetadata
 ```
 
 ## PARAMETERS
 
 ## INPUTS
-
-### None
 
 ## OUTPUTS
 

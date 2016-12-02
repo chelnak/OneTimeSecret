@@ -51,8 +51,10 @@ function Invoke-OTSRestMethod {
     )
 
 
-    # --- Test for connection variable
-    if (!(Get-Variable -Name OTSConnectionInfomation -Scope Global -ErrorAction SilentlyContinue)) {
+    # --- Grab the SessionState variable Test for connection variable
+    $OTSConnectionInfomation = $PSCmdlet.GetVariableValue("OTSConnectionInfomation")
+
+    if (!$OTSConnectionInfomation) {
 
         throw "Could not find OTSConnectionInfomation. Please run Set-OTSConnectionInformation first"
 
@@ -66,7 +68,7 @@ function Invoke-OTSRestMethod {
 
     $Headers = @{
 
-        "Authorization" = "Basic $($Global:OTSConnectionInfomation.Authorization)"
+        "Authorization" = "Basic $($OTSConnectionInfomation.Authorization)"
     }
 
     try {
@@ -75,19 +77,19 @@ function Invoke-OTSRestMethod {
 
         if ($PSBoundParameters.ContainsKey("Body")) {
 
-            $Response = Invoke-RestMethod -Method $Method -Headers $Headers -Uri $FullURI -Body $Body
+            $Response = Invoke-RestMethod -Method $Method -Headers $Headers -Uri $FullURI -Body $Body -Verbose:$VerbosePrefernce
 
         }
         else {
 
-            $Response = Invoke-RestMethod -Method $Method -Headers $Headers -Uri $FullURI
+            $Response = Invoke-RestMethod -Method $Method -Headers $Headers -Uri $FullURI -Verbose:$VerbosePreference
 
         }
 
     }
-    catch {
+    catch [Exception]{
 
-        throw
+        throw $_
 
     }
     finally {

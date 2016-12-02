@@ -9,5 +9,9 @@
 
     // Use a custom PowerShell Script Analyzer settings file for this workspace.
     // Relative paths for this setting are always relative to the workspace root dir.
-    "powershell.scriptAnalysis.settingsPath": "src/ScriptAnalyzerSettings.psd1"
+    "powershell.scriptAnalysis.settingsPath": "src/ScriptAnalyzerSettings.psd1",
+
+    // Set integrated terminal to PowerShell
+    "terminal.integrated.shell.windows": "C:\\Windows\\sysnative\\WindowsPowerShell\\v1.0\\powershell.exe",
+
 }

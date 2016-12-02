@@ -17,3 +17,7 @@ foreach($Function in @($Public + $Private)) {
 }
 
 Export-ModuleMember -Function $($Public | Select-Object -ExpandProperty BaseName) -Verbose:$VerbosePreference
+
+$ExecutionContext.SessionState.Module.OnRemove = {
+
+}
