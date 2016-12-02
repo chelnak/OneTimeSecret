@@ -47,7 +47,7 @@ Task UpdateModuleManifest {
 
     try {
 
-        $PublicFunctions = Get-ChildItem -Path "$($SrcRootDir)\Functions\Public" -Filter "*.psm1" -Recurse | Sort-Object
+        $PublicFunctions = Get-ChildItem -Path "$($SrcRootDir)\Functions\Public" -Filter "*.ps1" -Recurse | Sort-Object
 
         $ModuleManifest = Import-PowerShellDataFile -Path $ModuleManifestPath -Verbose:$VerbosePreference
 
