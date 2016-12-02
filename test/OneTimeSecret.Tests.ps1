@@ -11,7 +11,7 @@ if (!$SuppressImportModule) {
 # --- Get test variables
 if ($ENV:APPVEYOR) {
 
-    $Variables = $ENV:TestVariables
+    $Variables = $ENV:TestVariables | ConvertFrom-JSON
 
 } else {
 
