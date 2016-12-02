@@ -3,7 +3,7 @@
 
 # --- Define the build tasks
 Task Default -depends Build
-Task Build -depends Analyze, UpdateModuleManifest, UpdateDocumentation, StageFiles
+Task Build -depends Analyze, UpdateModuleManifest, UpdateDocumentation, StageFiles, CreateArtifact
 Task Release -depends Build, Test, BumpVersion
 
 Task Analyze {
@@ -155,21 +155,40 @@ Task StageFiles {
 
     $ModuleOutDir = "$($OutDir)\$($ModuleName)"
 
-    if (!(Test-Path -LiteralPath $ModuleOutDir)) {
+    if ((Test-Path -LiteralPath $ModuleOutDir)) {
 
-        New-Item $ModuleOutDir -ItemType Directory -Verbose:$VerbosePreference | Out-Null
-
-    }
-    else {
-
-        Write-Verbose "$($psake.context.currentTaskName) - directory already exists '$ModuleOutDir'."
+        Remove-Item -Path $ModuleOutDir -Recurse -Force | Out-Null
 
     }
 
-    Copy-Item -Path $SrcRootDir\* -Destination $ModuleOutDir -Recurse -Verbose:$VerbosePreference
+    New-Item $ModuleOutDir -ItemType Directory -Verbose:$VerbosePreference | Out-Null
+
+    Copy-Item -Path $SrcRootDir\* -Destination $ModuleOutDir -Recurse -Confirm:$false -Verbose:$VerbosePreference
 
 }
 
+Task CreateArtifact {
+
+    $ModuleOutDir = "$($OutDir)\$($ModuleName)"
+    $CurrentModuleVersion = (Import-PowerShellDataFile -Path $ModuleManifestPath).ModuleVersion
+    $ArchiveName = "$($ModuleOutDir)-$($CurrentModuleVersion).zip"
+
+    if (!(Test-Path -LiteralPath $ModuleOutDir )) {
+
+        Write-Verbose -Message "Release director does not exist skipping"
+        return
+
+    }
+
+    if ((Test-Path -LiteralPath $ArchiveName)) {
+
+        Remove-Item -LiteralPath $ArchiveName -Force | Out-Null
+
+    }
+
+    Compress-Archive -Path $ModuleOutDir -DestinationPath $ArchiveName -Force -Confirm:$false -Verbose:$VerbosePreference | Out-Null
+
+}
 
 Task BumpVersion {
 
@@ -268,13 +287,17 @@ Task BumpVersion {
 
 Task Test {
 
-    $Result = Invoke-Pester -Verbose:$VerbosePreference -PassThru
+    Push-Location -LiteralPath $TestDirectory
 
-    if ($Result) {
+    $ResultsFile = "$($TestDirectory)\data\PesterResults-$(Get-date -uformat "%Y%m%d-%H%M%S").xml"
+    $Results = Invoke-Pester -PassThru -OutputFormat NUnitXml -OutputFile $($ResultsFile)
 
-        $Result | ConvertTo-Json -Depth 100 | Out-File -FilePath $ResultsFile
+    if($Results.FailedCount -gt 0) {
+
         Write-Error -Message "Pester Tests Failed. See $($ResultsFile) for more information"
 
     }
+
+    Pop-Location
 
 }

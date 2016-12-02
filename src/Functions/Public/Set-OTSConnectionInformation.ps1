@@ -40,7 +40,7 @@ function Set-OTSConnectionInformation {
 
         $EncodedAuth = [System.Text.Encoding]::UTF8.GetBytes("$($Username):$($APIKey)")
 
-        $OTSConnectionInfomation = [PSCustomObject]@{
+        $OTSConnectionInformation = [PSCustomObject]@{
 
             Authorization = [System.Convert]::ToBase64String($EncodedAuth)
 
@@ -48,7 +48,7 @@ function Set-OTSConnectionInformation {
 
         try {
 
-            $PSCmdlet.SessionState.PSVariable.Set("OTSConnectionInfomation", $OTSConnectionInfomation)
+            $PSCmdlet.SessionState.PSVariable.Set("OTSConnectionInformation", $OTSConnectionInformation)
 
         } catch {
 
@@ -56,7 +56,7 @@ function Set-OTSConnectionInformation {
 
         }
 
-        Write-Output $OTSConnectionInfomation
+        Write-Output $OTSConnectionInformation
 
     }
 

@@ -8,32 +8,17 @@ if (!$SuppressImportModule) {
     Import-Module $ModuleManifestPath -Scope Global
 }
 
-# Get test variables
+# --- Get test variables
 $Variables = Get-Content -Path $PSScriptRoot\Variables.json -Raw | ConvertFrom-Json
 
-Describe 'Module Manifest Tests' {
-
-    It 'Test-ModuleManifest' {
-
-        Test-ModuleManifest -Path $ModuleManifestPath
-        $? | Should Be $true
-
-    }
-
-}
+# --- Set OTSConnectionInformation as a global variable to avoide strange sessions state context issues
+$GLOBAL:OTSConnectionInformation = Set-OTSConnectionInformation -Username $Variables.Username -APIKey $Variables.APIKey
 
 Describe -Name 'Module Function Tests' {
 
     Context -Name "Public Functions" -Fixture {
 
         # --- CREATE
-        It -Name "Create Authorization" -Test {
-
-           $Connection = Set-OTSConnectionInformation -Username $Variables.Username -APIKey $Variables.APIKey
-           $Connection.Authorization | Should Not Be $null
-
-        }
-
         It -Name "Create Secret" -Test {
 
             $Param = @{
@@ -108,3 +93,6 @@ Describe -Name 'Module Function Tests' {
     }
 
 }
+
+Remove-Variable -Name OTSConnectionInformation -Scope Global -Force -ErrorAction SilentlyContinue
+Remove-Variable -Name Variables -Force -ErrorAction SilentlyContinue

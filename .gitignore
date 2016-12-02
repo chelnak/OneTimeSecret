@@ -3,3 +3,6 @@ Release/
 
 #Ignore Variables.json
 test/Variables.json
+
+# Ignore data directory
+test/data/

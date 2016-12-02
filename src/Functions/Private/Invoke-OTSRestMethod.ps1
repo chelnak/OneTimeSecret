@@ -52,11 +52,11 @@ function Invoke-OTSRestMethod {
 
 
     # --- Grab the SessionState variable Test for connection variable
-    $OTSConnectionInfomation = $PSCmdlet.GetVariableValue("OTSConnectionInfomation")
+    $OTSConnectionInformation = $PSCmdlet.GetVariableValue("OTSConnectionInformation")
 
-    if (!$OTSConnectionInfomation) {
+    if (!$OTSConnectionInformation) {
 
-        throw "Could not find OTSConnectionInfomation. Please run Set-OTSConnectionInformation first"
+        throw "Could not find OTSConnectionInformation. Please run Set-OTSConnectionInformation first"
 
     }
 
@@ -68,7 +68,7 @@ function Invoke-OTSRestMethod {
 
     $Headers = @{
 
-        "Authorization" = "Basic $($OTSConnectionInfomation.Authorization)"
+        "Authorization" = "Basic $($OTSConnectionInformation.Authorization)"
     }
 
     try {
