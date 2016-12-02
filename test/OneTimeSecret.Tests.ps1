@@ -9,7 +9,15 @@ if (!$SuppressImportModule) {
 }
 
 # --- Get test variables
-$Variables = Get-Content -Path $PSScriptRoot\Variables.json -Raw | ConvertFrom-Json
+if ($ENV:APPVEYOR) {
+
+    $Variables = $ENV:TestVariables
+
+} else {
+
+    $Variables = Get-Content -Path $PSScriptRoot\Variables.json -Raw | ConvertFrom-Json
+
+}
 
 # --- Set OTSConnectionInformation as a global variable to avoide strange sessions state context issues
 $GLOBAL:OTSConnectionInformation = Set-OTSConnectionInformation -Username $Variables.Username -APIKey $Variables.APIKey

@@ -292,6 +292,13 @@ Task Test {
     $ResultsFile = "$($TestDirectory)\data\PesterResults-$(Get-date -uformat "%Y%m%d-%H%M%S").xml"
     $Results = Invoke-Pester -PassThru -OutputFormat NUnitXml -OutputFile $($ResultsFile)
 
+    if ($ENV:APPVEYOR){
+
+        $WC = New-Object 'System.Net.WebClient'
+        $WC.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($ENV:APPVEYOR_JOB_ID)", (Resolve-Path $ResultsFile))
+
+    }
+
     if($Results.FailedCount -gt 0) {
 
         Write-Error -Message "Pester Tests Failed. See $($ResultsFile) for more information"
