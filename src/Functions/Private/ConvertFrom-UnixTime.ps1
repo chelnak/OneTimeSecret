@@ -19,7 +19,7 @@ function ConvertFrom-UnixTime {
     ConvertFrom-UnixTime -UnixTime 777777
 
 #>
-[CmdletBinding()][OutputType('System.TimeZone')]
+[CmdletBinding()][OutputType('System.DateTime')]
 
     Param (
 
@@ -30,6 +30,8 @@ function ConvertFrom-UnixTime {
     )
 
 
-   [System.TimeZone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').` AddSeconds($UnixTime))
+    # --- Changed to Get-Date to support Core. This function will die soon.
+    #[System.TimeZone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').` AddSeconds($UnixTime))
+    (Get-Date -Date 1/1/1970).AddSeconds($UnixTime)
 
 }
