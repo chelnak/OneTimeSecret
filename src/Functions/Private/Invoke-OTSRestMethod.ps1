@@ -52,9 +52,7 @@ function Invoke-OTSRestMethod {
 
 
     # --- Grab the SessionState variable Test for connection variable
-    $OTSConnectionInformation = $PSCmdlet.GetVariableValue("OTSConnectionInformation")
-
-    if (!$OTSConnectionInformation) {
+    if (!$Script:OTSConnectionInformation) {
 
         throw "Could not find OTSConnectionInformation. Please run Set-OTSConnectionInformation first"
 
@@ -68,7 +66,7 @@ function Invoke-OTSRestMethod {
 
     $Headers = @{
 
-        "Authorization" = "Basic $($OTSConnectionInformation.Authorization)"
+        "Authorization" = "Basic $($Script:OTSConnectionInformation.Authorization)"
     }
 
     try {
@@ -94,8 +92,12 @@ function Invoke-OTSRestMethod {
     }
     finally {
 
-        $ServicePoint = [System.Net.ServicePointManager]::FindServicePoint($FullURI)
-        $ServicePoint.CloseConnectionGroup("") | Out-Null
+        if ($PSVersionTable.PSEdition -eq "Desktop") {
+
+            $ServicePoint = [System.Net.ServicePointManager]::FindServicePoint($FullURI)
+            $ServicePoint.CloseConnectionGroup("") | Out-Null
+
+        }
 
     }
 
