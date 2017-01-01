@@ -4,13 +4,6 @@
 
 Properties {
 
-# ----------------------- Module properties --------------------------------
-
-    # --- Setting to use when calling the BumpVersion task. This can either be Major, Minor or Patch.
-    # --- This setting should eventually be parameterised
-    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-    $BumpVersion = "Patch"
-
 # ----------------------- Basic properties --------------------------------
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
     $SrcRootDir  = "$PSScriptRoot\src"
@@ -51,12 +44,34 @@ Properties {
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
     $ScriptAnalyzerSettingsPath = "$PSScriptRoot\PSScriptAnalyzerSettings.psd1"
 
-# ------------------ Test Properties ---------------------------
+# ----------------------- GitHubReleaseManager properties --------------------------------
 
-    # Set the location and name of the Pester results file.
-    # Remember to update .gitignore if the path changes
+    # --- The name of the repository. This will be set to the modules name by default.
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-    $ResultsFile = "$($PSScriptRoot)\Pester.Results-$(Get-Date -Format ddMMyyyHHMMSS).json"
+    $GithubRepositoryName = $($ModuleName)
 
+    # --- The owner of the repository.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
+    $GitHubUsername = "chelnak"
+
+    # --- Personal Access Token. Store your token in a file called .gittoken in the root of the repository
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
+    $GitHubAPIKey = (Get-Content -Path "$($PSScriptRoot)\.gittoken" -Raw)
+
+    # --- The branch that you want to publish the release from. By default this is the master branch.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
+    $GitHubReleaseTarget = "master"
+
+# ----------------------- PowerShell Gallery properties --------------------------------
+
+      # --- PowerShell Gallery APIKey. Store your token in a file called .nugetapikey in the root of the repository
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
+    $NuGetAPIKey = (Get-Content -Path "$($PSScriptRoot)\.nugetapikey" -Raw)
+
+# ----------------------- VersioningSettings properties --------------------------------
+
+    # --- $Version is a parameter from build.ps1
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
+    $BumpVersion = $Version
 
 }

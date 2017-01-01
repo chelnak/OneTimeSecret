@@ -1,4 +1,4 @@
-#Requires -Modules Psake, Pester, PSScriptAnalyzer, PlatyPS
+#Requires -Modules Psake, Pester, PSScriptAnalyzer, PlatyPS, GitHubReleaseManager
 #Requires -Version 5
 
 <#
@@ -12,6 +12,7 @@
     - Pester
     - PSScriptAnalyzer
     - PlatyPS
+    - GitHubReleaseManager
 
     Each task in build.psake.ps1 relies on settings provided in build.settings.ps1
 
@@ -26,11 +27,6 @@
     - UpdateModuleManifest
     - UpdateDocumentation
     - BumpVersion
-    - Test
-
-    The default value is Build which will execute the following tasks: Analyze, UpdateModuleManifest, UpdateDocumentation
-
-    Chosing release will execute the following tasks: All tasks in Build, Test, BumpVersion.
 
     The BumpVersion will increment the version of the Module Manifest based on the $BumpVersion setting provided in build.settings.ps1.
     By default this is patch.
@@ -44,8 +40,11 @@
     .EXAMPLE
     .\build.ps1
 
+    .EXAMPLE
+    .\build.ps1 -Task Build -Version PATCH
+
     .Example
-    .\build.ps1 -Task Release
+    .\build.ps1 -Task Publish
 
     .Example
     .\build.ps1 -Task Analyze
@@ -59,9 +58,6 @@
     .Example
     .\build.ps1 -Task BumpVersion
 
-    .Example
-    .\build.ps1 -Task Test
-
 #>
 
 [Cmdletbinding()]
@@ -69,12 +65,16 @@
 Param (
 
     [Parameter()]
-    [ValidateSet("Build", "Release", "Analyze", "UpdateModuleManifest", "UpdateDocumentation", "BumpVersion", "Test")]
-    [String]$Task = "Build"
+    [ValidateSet("Build", "Publish", "Analyze", "UpdateModuleManifest", "UpdateDocumentation", "BumpVersion", "Default")]
+    [String]$Task = "Default",
+
+    [Parameter()]
+    [ValidateSet("PATCH", "MINOR", "MAJOR")]
+    [String]$Version
 
 )
 
 # --- Start Build
-Invoke-psake -buildFile "$($PSScriptRoot)\build.psake.ps1" -taskList $Task -nologo -Verbose:$VerbosePreference
+Invoke-psake -buildFile "$($PSScriptRoot)\build.psake.ps1" -taskList $Task  -parameters @{"Version"=$Version} -nologo -Verbose:$VerbosePreference
 
 exit ( [int]( -not $psake.build_success ) )
