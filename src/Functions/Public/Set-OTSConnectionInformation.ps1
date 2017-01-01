@@ -38,17 +38,15 @@ function Set-OTSConnectionInformation {
 
     if ($PSCmdlet.ShouldProcess("onetimesecret.com")){
 
-        $EncodedAuth = [System.Text.Encoding]::UTF8.GetBytes("$($Username):$($APIKey)")
-
-        $OTSConnectionInformation = [PSCustomObject]@{
-
-            Authorization = [System.Convert]::ToBase64String($EncodedAuth)
-
-        }
-
         try {
 
-            $PSCmdlet.SessionState.PSVariable.Set("OTSConnectionInformation", $OTSConnectionInformation)
+            $EncodedAuth = [System.Text.Encoding]::UTF8.GetBytes("$($Username):$($APIKey)")
+
+            $Script:OTSConnectionInformation = [PSCustomObject]@{
+
+                Authorization = [System.Convert]::ToBase64String($EncodedAuth)
+
+            }
 
         } catch {
 
@@ -56,7 +54,7 @@ function Set-OTSConnectionInformation {
 
         }
 
-        Write-Output $OTSConnectionInformation
+        Write-Output $Script:OTSConnectionInformation
 
     }
 
