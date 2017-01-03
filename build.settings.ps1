@@ -54,9 +54,14 @@ Properties {
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
     $GitHubUsername = "chelnak"
 
-    # --- Personal Access Token. Store your token in a file called .gittoken in the root of the repository
-    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-    $GitHubAPIKey = (Get-Content -Path "$($PSScriptRoot)\.gittoken" -Raw)
+    # --- Personal Access Token.
+    # --- If in an appveyor environment grab ENV:GitToken
+    # --- For local builds store your token in a file called .gittoken in the root of the repository
+    if ($ENV:APPVEYOR) {
+        $GitHubAPIKey = $ENV:GitToken
+    } else {
+        $GitHubAPIKey = (Get-Content -Path "$($PSScriptRoot)\.gittoken" -Raw)
+    }
 
     # --- The branch that you want to publish the release from. By default this is the master branch.
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
@@ -64,9 +69,14 @@ Properties {
 
 # ----------------------- PowerShell Gallery properties --------------------------------
 
-      # --- PowerShell Gallery APIKey. Store your token in a file called .nugetapikey in the root of the repository
-    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-    $NuGetAPIKey = (Get-Content -Path "$($PSScriptRoot)\.nugetapikey" -Raw)
+    # --- PowerShell Gallery APIKey.
+    # --- If in an appveyor environment grab ENV:GitToken
+    # --- for local builds store your token in a file called .nugetapikey in the root of the repository
+    if ($ENV:APPVEYOR) {
+        $NuGetAPIKey = $ENV:NugetAPIKey
+    }else {
+        $NuGetAPIKey = (Get-Content -Path "$($PSScriptRoot)\.nugetapikey" -Raw)
+    }
 
 # ----------------------- VersioningSettings properties --------------------------------
 
