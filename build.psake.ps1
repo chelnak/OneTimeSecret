@@ -8,7 +8,7 @@ Task Publish -depends CreateGitHubRelease, PublishPSGallery
 
 Task Analyze {
 
-    $Results = Invoke-ScriptAnalyzer -Path $SrcRootDir -Recurse  -Settings $ScriptAnalyzerSettingsPath -Verbose:$VerbosePreference
+    $Results = Invoke-ScriptAnalyzer -Path $SrcRootDir -Recurse -Settings $ScriptAnalyzerSettingsPath -Verbose:$VerbosePreference
     $Results | Select-Object RuleName, Severity, ScriptName, Line, Message | Format-List
 
     switch ($ScriptAnalysisFailBuildOnSeverityLevel) {
