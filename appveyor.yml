@@ -10,6 +10,6 @@ environment:
 init:
   - ps: Install-PackageProvider NuGet -Force | Out-Null
 install:
-  - ps: Install-Module -Name Psake, Pester, PSScriptAnalyzer, PlatyPS -Force
+  - ps: Install-Module -Name Psake, Pester, PSScriptAnalyzer, PlatyPS, GitHubReleaseManager -Force
 test_script:
   - ps: .\build.ps1 -Task Analyze
