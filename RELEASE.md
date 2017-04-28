@@ -4,4 +4,5 @@
 
 ## Fixes / Improvements
 * Build and deploy improvements
+* Fixes module tests
 * Documentation updates
