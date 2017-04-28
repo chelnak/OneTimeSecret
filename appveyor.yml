@@ -5,7 +5,7 @@ branches:
   - development
 environment:
   TestVariables:
-    secure: SNbiIrjKaGL3EUurLoHYHIw67MDCQWaTHTQBWR3Gi9sMf6hIW+rinrcxnhohpfmDdPKrzFYBKiWg5ne1VNxThC8EcxwL/zH5kU4UdoqhAC9WsxjGrAQJdCeQLEf/nb4UJDuC7P0iWELzhaRZGK+CE3iBq6j8TE0+j/+0Nm/Kwox97pjj19SBps8VURDuUSBXv6NkTcKvyMYts1D1Io79BzC8qiPH89PC01J+uZuigAV61x+5JdMfzcH5hsXYq2Iycxm2PuiA/c7D6nyHL/FhOChySajdyKOEsdNHRyF8uutMj1tJUn/zFaz+1kvCclH2
+    secure: sD7DCYu5R1vjytOawpbD7lOfhk4WKAX/QfZb9AR1j8iYs/1XjylpVMdaAtHHKcJDYhNAEztk47N/taoOqhcrOwr118IWKV5Yxbf+bw01c8v0xd5nR2DovxT/8eZ1Nc2IZBKFiheTX2M7JCAifPjHWE/u99Dp8dpBSJAmRK1lwKYIpQ+DIfwXZQbaWJeeE/RYOGjj9bZQ2+wxWGmQAO0tOXglSyOQ75Z43kf6y1XYCmztx/yhUMhbAxJbFhbrttlyG+wmPYv6IB4QNNYcpPk37+3Z1suOvN/eOLOPGWGnKdik9J1RDUL/4YWNh9fKxfP5
   gh_token:
     secure: Zp+1OaziEY3qRLb2m0fodp+pmezszMM4aE5ZcXcWJgMcAOa5gxjdVNWKT5Ve3xt4
   psg_token:
