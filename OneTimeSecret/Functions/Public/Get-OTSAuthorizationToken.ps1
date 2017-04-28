@@ -16,7 +16,7 @@ function Get-OTSAuthorizationToken {
     Get-OTSAuthorizationToken
 
 #>
-[CmdletBinding()][OutputType('System.String')]
+[CmdletBinding()][OutputType('System.Management.Automation.PSObject')]
 
     Param ()
 

@@ -19,10 +19,10 @@ function Set-OTSAuthorizationToken {
     System.String
 
     .EXAMPLE
-    Set-OTSAuthorizationToken -Username craiggumbley@gmail.com -Password 52302308eff2e799aea33cbc7c85896b4c6a6997
+    Set-OTSAuthorizationToken -Username user@mail.com -APIKey 52302308erf2e799affd33cbc7c85896b4c6a6997
 
 #>
-[CmdletBinding(SupportsShouldProcess,ConfirmImpact="Low")][OutputType('System.String')]
+[CmdletBinding(SupportsShouldProcess,ConfirmImpact="Low")][OutputType('System.Management.Automation.PSObject')]
 
     Param (
 
