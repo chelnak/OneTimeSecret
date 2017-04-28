@@ -17,7 +17,7 @@ function Set-OTSAuthorizationToken {
 
     .OUTPUTS
     System.Management.Automation.PSObject
-    
+
     .EXAMPLE
     Set-OTSAuthorizationToken -Username user@mail.com -APIKey 52302308erf2e799affd33cbc7c85896b4c6a6997
 
@@ -33,7 +33,6 @@ function Set-OTSAuthorizationToken {
         [Parameter(Mandatory=$true, Position=1)]
         [ValidateNotNullOrEmpty()]
         [String]$APIKey
-
     )
 
     if ($PSCmdlet.ShouldProcess("onetimesecret.com")){
@@ -41,11 +40,9 @@ function Set-OTSAuthorizationToken {
         try {
 
             $EncodedAuth = [System.Text.Encoding]::UTF8.GetBytes("$($Username):$($APIKey)")
-
             $Script:OTSConnectionInformation = [PSCustomObject]@{
 
                 Authorization = [System.Convert]::ToBase64String($EncodedAuth)
-
             }
 
             Write-Output $Script:OTSConnectionInformation
@@ -53,9 +50,6 @@ function Set-OTSAuthorizationToken {
         } catch {
 
             throw $_
-
         }
-
     }
-
 }

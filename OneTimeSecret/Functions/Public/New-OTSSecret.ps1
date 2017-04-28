@@ -43,7 +43,6 @@ function New-OTSSecret {
         [Parameter(Position=4)]
         [ValidateNotNullOrEmpty()]
         [String]$Recipient
-
     )
 
     # --- Set URI with mandatory query parameters
@@ -54,47 +53,38 @@ function New-OTSSecret {
         if ($PSBoundParameters.ContainsKey("Ttl")){
 
             Write-Verbose -Message "Adding Ttl Query Parameter"
-
             $URI = "$($URI)&ttl=$($Ttl)"
-
         }
 
         if ($PSBoundParameters.ContainsKey("Recipient")) {
 
             Write-Verbose -Message "Adding Recipient Parameter"
-
             $URI = "$($URI)&recipient=$($Recipient)"
-
         }
 
         if ($PSCmdlet.ShouldProcess("onetimesecret.com")){
 
             $Response = Invoke-OTSRestMethod -Method POST -URI $URI -Verbose:$VerbosePreference
 
+            [PSCustomObject]@{
+
+                CustId = $Response.custid
+                MetadataKey = $Response.metadata_key
+                SecretKey = $Response.secret_key
+                Ttl = $Response.ttl
+                MetadataTtl = $Response.metadata_ttl
+                SecretTtl = $Response.secret_ttl
+                State = $Response.state
+                Updated = (ConvertFrom-UnixTime -UnixTime $Response.updated).ToString()
+                Created = (ConvertFrom-UnixTime -UnixTime $Response.created).ToString()
+                Recipient = $Response.recipient
+                Value = $Response.value
+                PassphraseRequired = $Response.passphrase_required
+            }
         }
-
-        [PSCustomObject]@{
-
-            CustId = $Response.custid
-            MetadataKey = $Response.metadata_key
-            SecretKey = $Response.secret_key
-            Ttl = $Response.ttl
-            MetadataTtl = $Response.metadata_ttl
-            SecretTtl = $Response.secret_ttl
-            State = $Response.state
-            Updated = (ConvertFrom-UnixTime -UnixTime $Response.updated).ToString()
-            Created = (ConvertFrom-UnixTime -UnixTime $Response.created).ToString()
-            Recipient = $Response.recipient
-            Value = $Response.value
-            PassphraseRequired = $Response.passphrase_required
-
-        }
-
     }
     catch {
 
-        throw
-
+        throw $_
     }
-
 }

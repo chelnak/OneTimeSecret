@@ -27,7 +27,6 @@ function Get-OTSSecretMetadata {
         [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true, Position=0)]
         [ValidateNotNullOrEmpty()]
         [String]$MetadataKey
-
     )
 
     # --- Set URI with mandatory query parameters
@@ -50,15 +49,10 @@ function Get-OTSSecretMetadata {
             Created = (ConvertFrom-UnixTime -UnixTime $Response.created).ToString()
             Recipient = $Response.recipient
             PassphraseRequired = $Response.passphrase_required
-
         }
-
-
     }
     catch {
 
-        throw
-
+        throw $_
     }
-
 }

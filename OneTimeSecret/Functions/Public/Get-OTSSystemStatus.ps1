@@ -30,14 +30,10 @@ function Get-OTSSystemStatus {
         [PSCustomObject]@{
 
             Status = $Response.status
-
         }
-
     }
     catch {
 
-        throw
-
+        throw $_
     }
-
 }

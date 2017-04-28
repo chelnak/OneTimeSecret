@@ -11,7 +11,7 @@ function Get-OTSAuthorizationToken {
 
     .OUTPUTS
     System.Management.Automation.PSObject
-    
+
     .Example
     Get-OTSAuthorizationToken
 
@@ -26,16 +26,12 @@ function Get-OTSAuthorizationToken {
         if (!$Script:OTSConnectionInformation) {
 
             throw "Could not find OTSConnectionInformation. Please run Set-OTSAuthorizationToken first"
-
         }
 
         Write-Output $Script:OTSConnectionInformation
-
     }
     catch {
 
-        throw
-
+        throw $_
     }
-
 }

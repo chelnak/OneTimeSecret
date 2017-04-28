@@ -44,6 +44,6 @@ function Get-OTSRecentMetadata {
     }
     catch {
 
-        throw
+        throw $_
     }
 }
