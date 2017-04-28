@@ -74,7 +74,7 @@ Task ExecuteTests {
     $Timestamp = Get-date -uformat "%Y%m%d-%H%M%S"
     $TestFile = "TestResults_PS$PSVersion`_$TimeStamp.xml"
     $Parameters = @{
-        Script = "$ENV:BHProjectPath\tests"
+        Script = "$ENV:BHProjectPath\test"
         PassThru = $true
         OutputFormat = 'NUnitXml'
         OutputFile = "$ENV:BHProjectPath\$TestFile"
