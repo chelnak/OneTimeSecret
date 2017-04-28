@@ -126,6 +126,7 @@ Task UpdateDocumentation {
 
     if ($ENV:BHBranchName -eq "master") {
         Write-Output "This task cannot be executed on the master branch. Skpping task"
+        return
     }
 
     Write-Output "Updating Markdown help"
@@ -164,7 +165,6 @@ copyright: "$($ModuleName) is licenced under the <a href='$($RepositoryUrl)/raw/
 pages:
 - 'Home' : 'index.md'
 - 'Change log' : 'CHANGELOG.md'
-- 'Build' : 'build.md'
 - 'Functions':
 $($Functions -join "`r`n")
 "@
@@ -199,6 +199,11 @@ Task IncrementVersion {
         # --- Update change log
         $ReleaseNotes = "$ENV:BHProjectPath\RELEASE.md"
         $ChangeLog = "$DocsDirectory\CHANGELOG.md"
+
+        if (!(Test-Path -Path $ChangeLog)) {
+            New-Item -Path $ChangeLog -ItemType File -Force
+        }
+
         $Header = "# Version $($StepVersion)`r"
         $Header, (Get-Content -Path $ReleaseNotes -Raw), "`r", (Get-Content $ChangeLog -Raw) | Set-Content $ChangeLog
     }
