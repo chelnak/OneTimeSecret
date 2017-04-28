@@ -6,7 +6,7 @@ function New-OTSSharedSecret {
     .DESCRIPTION
     Store and share a secret value
 
-    .PARAMETER SecretKey
+    .PARAMETER Secret
     The secret value which is encrypted before being stored. There is a maximum length based on your plan that is enforced (1k-10k
 
     .PARAMETER Passphrase
