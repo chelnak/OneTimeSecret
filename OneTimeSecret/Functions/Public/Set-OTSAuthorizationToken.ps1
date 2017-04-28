@@ -16,8 +16,8 @@ function Set-OTSAuthorizationToken {
     System.String
 
     .OUTPUTS
-    System.String
-
+    System.Management.Automation.PSObject
+    
     .EXAMPLE
     Set-OTSAuthorizationToken -Username user@mail.com -APIKey 52302308erf2e799affd33cbc7c85896b4c6a6997
 

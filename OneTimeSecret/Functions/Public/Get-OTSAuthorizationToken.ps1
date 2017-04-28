@@ -10,8 +10,8 @@ function Get-OTSAuthorizationToken {
     None
 
     .OUTPUTS
-    System.String
-
+    System.Management.Automation.PSObject
+    
     .Example
     Get-OTSAuthorizationToken
 
