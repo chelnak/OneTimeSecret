@@ -1,6 +1,6 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/qbhbapqr9xt24413?svg=true)](https://ci.appveyor.com/project/chelnak/onetimesecret)
 
-#OneTimeSecret
+# OneTimeSecret
 
 A PowerShell module for OneTimeSecret.com
 
@@ -21,12 +21,6 @@ You can view your authorization token at any time with the following command:
 `Get-OTSAuthorizationToken`
 
 View documentation on ReadTheDocs.com [here](http://onetimesecret.readthedocs.io/en/latest/)
-
-## Build
-
-- Clone the repository and run `build.ps1 -Task Build`
-- Import-Module Release\OneTimeSecret\OneTimeSecret.psd1
-- View public commands provided by the module with `Get-Command -Module OneTimeSecret`
 
 ## Contribute
 
