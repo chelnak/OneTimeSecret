@@ -12,15 +12,19 @@ Install-Module -Name OneTimeSecret
 
 ## Usage
 
-Before using any of the commands you will need to run Set-OTSConnectionInformation to create the authorization header needed for requests
+Before using any of the commands you will need to run Set-OTSAuthorizationToken to create the authorization header needed for requests
 
-`Set-OTSConnectionInformation -Username user@mail.com -APIKey xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+`Set-OTSAuthorizationToken -Username user@mail.com -APIKey xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+You can view your authorization token at any time with the following command:
+
+`Get-OTSAuthorizationToken`
 
 View documentation on ReadTheDocs.com [here](http://onetimesecret.readthedocs.io/en/latest/)
 
 ## Build
 
-- Clone the repository and run `build.ps1`
+- Clone the repository and run `build.ps1 -Task Build`
 - Import-Module Release\OneTimeSecret\OneTimeSecret.psd1
 - View public commands provided by the module with `Get-Command -Module OneTimeSecret`
 

@@ -1,14 +1,39 @@
 # --- Dot source build.settings.ps1
 . $PSScriptRoot\build.settings.ps1
 
+# --- Add any parameters from build.ps1
+properties {
+    $CurrentVersion = [version](Get-Metadata -Path $env:BHPSModuleManifest)
+
+    if ($Increment) {
+        $StepVersion = [version](Step-Version $CurrentVersion -By $Increment)
+    }
+}
+
 # --- Define the build tasks
-Task Default -depends Analyze, UpdateModuleManifest, UpdateDocumentation
-Task Build -depends Analyze, BumpVersion, UpdateModuleManifest, UpdateDocumentation, StageFiles, CreateArtifact
-Task Publish -depends CreateGitHubRelease, PublishPSGallery
+Task Default -depends Test
+Task Test -depends Init, Analyze, ExecuteTests
+Task Build -depends Test, UpdateModuleManifest, UpdateDocumentation, IncrementVersion, CommitChanges, CreateArtifact
+Task Release -depends CreateArtifact, CreateGitHubRelease, PublishToPSGallery
+
+Task Init {
+
+    Write-Output "Build System Details:"
+    foreach ($Item in (Get-Item -Path ENV:BH*)){
+        Write-Output "$($Item.Name): $($Item.Value)"
+    }
+    Write-Output "ScriptAnalyzerSeverityLevel: $($ScriptAnalysisFailBuildOnSeverityLevel)"
+    Write-Output "Current Module Version: $($CurrentVersion)"
+    Write-Output "Increment: $($Increment)"
+}
+
+##############
+# Task: Test #
+##############
 
 Task Analyze {
 
-    $Results = Invoke-ScriptAnalyzer -Path $SrcRootDir -Recurse -Settings $ScriptAnalyzerSettingsPath -Verbose:$VerbosePreference
+    $Results = Invoke-ScriptAnalyzer -Path $ENV:BHModulePath -Recurse -Settings $ScriptAnalyzerSettingsPath -Verbose:$VerbosePreference
     $Results | Select-Object RuleName, Severity, ScriptName, Line, Message | Format-List
 
     switch ($ScriptAnalysisFailBuildOnSeverityLevel) {
@@ -21,14 +46,14 @@ Task Analyze {
         'Error' {
 
             Assert -conditionToCheck (
-                ($analysisResult | Where-Object Severity -eq 'Error').Count -eq 0
+                ($Results | Where-Object Severity -eq 'Error').Count -eq 0
                 ) -failureMessage 'One or more ScriptAnalyzer errors were found. Build cannot continue!'
 
         }
         'Warning' {
 
             Assert -conditionToCheck (
-                ($analysisResult | Where-Object {
+                ($Results | Where-Object {
                     $_.Severity -eq 'Warning' -or $_.Severity -eq 'Error'
                 }).Count -eq 0) -failureMessage 'One or more ScriptAnalyzer warnings were found. Build cannot continue!'
 
@@ -43,284 +68,331 @@ Task Analyze {
 
 }
 
-Task UpdateModuleManifest {
+Task ExecuteTests {
 
-    try {
-
-        $PublicFunctions = Get-ChildItem -Path "$($SrcRootDir)\Functions\Public" -Filter "*.ps1" -Recurse | Sort-Object
-
-        $ModuleManifest = Import-PowerShellDataFile -Path $ModuleManifestPath -Verbose:$VerbosePreference
-
-        # --- Functions To Export
-        Write-Verbose -Message "Processing FunctionsToExport"
-        $ModuleManifest.FunctionsToExport = $PublicFunctions | Select-Object -ExpandProperty BaseName | Sort-Object
-
-        # --- Private Data
-        Write-Verbose -Message "Processing PrivateData"
-        if ($ModuleManifest.ContainsKey("PrivateData") -and $ModuleManifest.PrivateData.ContainsKey("PSData")) {
-
-            foreach ($node in $ModuleManifest.PrivateData["PSData"].GetEnumerator()) {
-
-                $key = $node.Key
-
-                if ($node.Value.GetType().Name -eq "Object[]") {
-
-                    $value = $node.Value | ForEach-Object {$_}
-
-                }
-                else {
-
-                    $value = $node.Value
-
-                }
-
-                $ModuleManifest[$key] = $value
-            }
-
-            $ModuleManifest.Remove("PrivateData")
-
-        }
-
-        New-ModuleManifest -Path $ModuleManifestPath @ModuleManifest -Verbose:$VerbosePreference
-
+    # --- Run Tests. Currently limited to help tests
+    $Timestamp = Get-date -uformat "%Y%m%d-%H%M%S"
+    $TestFile = "TestResults_PS$PSVersion`_$TimeStamp.xml"
+    $Parameters = @{
+        Script = "$ENV:BHProjectPath\tests"
+        PassThru = $true
+        OutputFormat = 'NUnitXml'
+        OutputFile = "$ENV:BHProjectPath\$TestFile"
     }
-    catch [System.Exception] {
 
-        Write-Error -Message "An error occured when updating manifest functions: $_.Message"
+    $TestResults = Invoke-Pester @Parameters
 
+    If ($ENV:BHBuildSystem -eq 'AppVeyor') {
+        "Uploading $ENV:BHProjectPath\$TestFile to AppVeyor"
+        "JobID: $env:APPVEYOR_JOB_ID"
+        (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path "$ENV:BHProjectPath\$TestFile"))
+    }
+    
+    Remove-Item "$ENV:BHProjectPath\$TestFile" -Force -ErrorAction SilentlyContinue
+
+    if ($TestResults.FailedCount -gt 0) {
+        Write-Error "Failed '$($TestResults.FailedCount)' tests, build failed"
     }
 
 }
 
+###############
+# Task: Build #
+###############
+
+Task UpdateModuleManifest {
+
+    $PublicFunctions = Get-ChildItem -Path "$($ENV:BHModulePath)\Functions\Public" -Filter "*.ps1" -Recurse | Sort-Object
+
+    $ExportFunctions = @()
+
+    foreach ($FunctionFile in $PublicFunctions) {
+        $AST = [System.Management.Automation.Language.Parser]::ParseFile($FunctionFile.FullName, [ref]$null, [ref]$null)        
+        $Functions = $AST.FindAll({
+            # --- Only export functions that contain a "-" and do not start with "int"
+            $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] -and `
+            $args[0].Name -match "-" -and `
+            !$args[0].Name.StartsWith("int")
+        },$true)
+        if ($Functions.Name) {
+            $ExportFunctions += $Functions.Name
+        }        
+    }
+
+    Set-ModuleFunctions -Name $ENV:BHPSModuleManifest -FunctionsToExport $ExportFunctions -Verbose:$VerbosePreference
+}
+
 Task UpdateDocumentation {
 
-    $ModuleInfo = Import-Module $ModuleManifestPath -Global -Force -PassThru
-
-    # --- Create or update existing MD documentation
-    if ($ModuleInfo.ExportedCommands.Count -eq 0) {
-        "No commands have been exported. Skipping $($psake.context.currentTaskName) task."
-        return
+    if ($ENV:BHBranchName -eq "master") {
+        Write-Output "This task cannot be executed on the master branch. Skpping task"
     }
 
-    if ((Test-Path -Path $DocsDirectory)) {
+    Write-Output "Updating Markdown help"
+    $ModuleInfo = Import-Module $ENV:BHPSModuleManifest -Global -Force -PassThru
+    $FunctionsPath = "$DocsDirectory\functions"
 
-        # --- Clean the documentation directory
-        if ($DocsDirectory) {
+    Remove-Item -Path $FunctionsPath -Recurse -Force -ErrorAction SilentlyContinue
+    New-Item $FunctionsPath -ItemType Directory | Out-Null
 
-            Remove-Item -Path $DocsDirectory -Force -Recurse | Out-Null
-
-        }
-
+    $PlatyPSParameters = @{
+        Module = $ModuleName
+        OutputFolder = $FunctionsPath
+        NoMetadata = $true
     }
 
-    # --- Create a new documentation directory
-    New-Item $DocsDirectory -ItemType Directory | Out-Null
-
-    # --- ErrorAction set to SilentlyContinue so this command will not overwrite an existing MD file.
-    New-MarkdownHelp -Module $ModuleName -Locale $DefaultLocale -OutputFolder $DocsDirectory -NoMetadata `
-                    -ErrorAction SilentlyContinue -Verbose:$VerbosePreference | Out-Null
+    New-MarkdownHelp @PlatyPSParameters -ErrorAction SilentlyContinue -Verbose:$VerbosePreference | Out-Null
 
     # --- Ensure that index.md is present and up to date
+    Write-Output "Updating index.md"
     Copy-Item -Path "$($PSScriptRoot)\README.md" -Destination "$($DocsDirectory)\index.md" -Force -Verbose:$VerbosePreference | Out-Null
 
     # --- Update mkdocs.yml with new functions
+    Write-Output "Updating mkdocs.yml"
     $Mkdocs = "$($PSScriptRoot)\mkdocs.yml"
-
-    if (!(Test-Path -Path $Mkdocs)) {
-
-        Write-Verbose -Message "Creating MKDocs.yml"
-
-        New-Item -Path $Mkdocs -ItemType File -Force | Out-Null
-
-    }
-
-    $Functions = $ModuleInfo.ExportedCommands.Keys | ForEach-Object {"    - $($_) : $($_).md"}
+    $Functions = $ModuleInfo.ExportedCommands.Keys | ForEach-Object {"    - $($_) : functions/$($_).md"}
 
     $Template = @"
 ---
 
 site_name: $($ModuleName)
+repo_url: $($RepositoryUrl)
+site_author: $($ModuleAuthor)
+edit_uri: edit/master/docs/
+theme: readthedocs
+copyright: "$($ModuleName) is licenced under the <a href='$($RepositoryUrl)/raw/master/LICENSE'>MIT license"
 pages:
 - 'Home' : 'index.md'
+- 'Change log' : 'CHANGELOG.md'
+- 'Build' : 'build.md'
 - 'Functions':
 $($Functions -join "`r`n")
 "@
 
-    $Template | Out-File -FilePath $Mkdocs -Force
+    $Template | Set-Content -Path $Mkdocs -Force
 
 }
 
-Task StageFiles {
+Task IncrementVersion {
 
-    $ModuleOutDir = "$($OutDir)\$($ModuleName)"
-
-    if ((Test-Path -LiteralPath $ModuleOutDir)) {
-
-        Remove-Item -Path $ModuleOutDir -Recurse -Force | Out-Null
-
+    if ($ENV:BHBranchName -eq "master") {
+        Write-Output "This task cannot be executed on the master branch. Skpping task"
     }
 
-    New-Item $ModuleOutDir -ItemType Directory -Verbose:$VerbosePreference | Out-Null
-
-    Copy-Item -Path $SrcRootDir\* -Destination $ModuleOutDir -Recurse -Confirm:$false -Verbose:$VerbosePreference
-
-}
-
-Task CreateArtifact {
-
-    $ModuleOutDir = "$($OutDir)\$($ModuleName)"
-    $CurrentModuleVersion = (Import-PowerShellDataFile -Path $ModuleManifestPath).ModuleVersion
-    $ArchiveName = "$($ModuleOutDir)-$($CurrentModuleVersion).zip"
-
-    if (!(Test-Path -LiteralPath $ModuleOutDir )) {
-
-        Write-Verbose -Message "Release director does not exist skipping"
-        return
-
+    if (!$StepVersion) {
+        Write-Output "StepVersion not specified. Skipping task"
     }
 
-    if ((Test-Path -LiteralPath $ArchiveName)) {
+    if ([version]$StepVersion -gt [version]$CurrentVersion) {
 
-        Remove-Item -LiteralPath $ArchiveName -Force | Out-Null
-
-    }
-
-    Compress-Archive -Path $ModuleOutDir -DestinationPath $ArchiveName -Force -Confirm:$false -Verbose:$VerbosePreference | Out-Null
-
-}
-
-Task BumpVersion {
-
-    # --- Get the current version of the module
-    $ModuleManifest = Import-PowerShellDataFile -Path $ModuleManifestPath -Verbose:$VerbosePreference
-
-    $CurrentModuleVersion = $ModuleManifest.ModuleVersion
-
-    $ModuleManifest.Remove("ModuleVersion")
-
-    Write-Verbose -Message "Current module version is $($CurrentModuleVersion)"
-
-    [Int]$MajorVersion = $CurrentModuleVersion.Split(".")[0]
-    [Int]$MinorVersion = $CurrentModuleVersion.Split(".")[1]
-    [Int]$PatchVersion = $CurrentModuleVersion.Split(".")[2]
-
-    $ModuleManifest.ScriptsToProcess = $ModuleManifest.ScriptsToProcess | ForEach-Object {$_}
-    $ModuleManifest.FunctionsToExport = $ModuleManifest.FunctionsToExport | ForEach-Object {$_}
-    $ModuleManifest.NestedModules = $ModuleManifest.NestedModules | ForEach-Object {$_}
-    $ModuleManifest.RequiredModules = $ModuleManifest.RequiredModules | ForEach-Object {$_}
-    $ModuleManifest.ModuleList = $ModuleManifest.ModuleList | ForEach-Object {$_}
-
-    if ($ModuleManifest.ContainsKey("PrivateData") -and $ModuleManifest.PrivateData.ContainsKey("PSData")) {
-
-        foreach ($node in $ModuleManifest.PrivateData["PSData"].GetEnumerator()) {
-
-            $key = $node.Key
-
-            if ($node.Value.GetType().Name -eq "Object[]") {
-
-                $value = $node.Value | ForEach-Object {$_}
-
-            }
-            else {
-
-                $value = $node.Value
-
-            }
-
-            $ModuleManifest[$key] = $value
-
-        }
-
-        $ModuleManifest.Remove("PrivateData")
-    }
-
-
-    switch ($BumpVersion) {
-
-        'MAJOR' {
-
-            Write-Verbose -Message "Bumping module major release number"
-
-            $MajorVersion++
-            $MinorVersion = 0
-            $PatchVersion = 0
-
-            break
-
-        }
-
-        'MINOR' {
-
-            Write-Verbose -Message "Bumping module minor release number"
-
-            $MinorVersion++
-            $PatchVersion = 0
-
-            break
-
-        }
-
-        'PATCH' {
-
-            Write-Verbose -Message "Bumping module patch release number"
-
-            $PatchVersion++
-
-            break
-        }
-
-        default {
-
-            Write-Verbose -Message "Not bumping module version"
-            break
-
-        }
-
-    }
-
-    # --- Build the new version string
-    $ModuleVersion = "$($MajorVersion).$($MinorVersion).$($PatchVersion)"
-
-    if ([version]$ModuleVersion -gt [version]$CurrentModuleVersion) {
-
-        # --- Fix taken from: https://github.com/RamblingCookieMonster/BuildHelpers/blob/master/BuildHelpers/Public/Step-ModuleVersion.ps1
-        New-ModuleManifest -Path $ModuleManifestPath -ModuleVersion $ModuleVersion @ModuleManifest -Verbose:$VerbosePreference
-        Write-Verbose -Message "Module version updated to $($ModuleVersion)"
+        # --- Update module manifest version
+        Update-Metadata -Path $env:BHPSModuleManifest -PropertyName ModuleVersion -Value $StepVersion        
+        Write-Output "Module version updated to $($StepVersion)"
 
         # --- Update appveyor build version
         $AppveyorYMLPath = "$($PSScriptRoot)\appveyor.yml"
-        $AppveyorVersion = "$($ModuleVersion).{build}"
+        $AppveyorVersion = "$($StepVersion).{build}"
         $NewAppveyorYML = Get-Content -Path $AppveyorYMLPath | ForEach-Object { $_ -replace '^version: .+$', "version: $($AppveyorVersion)";}
         $NewAppveyorYML | Set-Content -Path $AppveyorYMLPath -Force
-        Write-Verbose -Message "Appveyor build version set to $($AppveyorVersion)"
+        Write-Output "Appveyor build version set to $($AppveyorVersion)"
 
+        # --- Update change log
+        $ReleaseNotes = "$ENV:BHProjectPath\RELEASE.md"
+        $ChangeLog = "$DocsDirectory\CHANGELOG.md"
+        $Header = "# Version $($StepVersion)`r"
+        $Header, (Get-Content -Path $ReleaseNotes -Raw), "`r", (Get-Content $ChangeLog -Raw) | Set-Content $ChangeLog
+    }
+}
+
+Task CommitChanges {
+
+    if ($ENV:BHBuildSystem -eq "Unknown"){
+        Write-Output "Could not detect build system. Skipping task"
+        return
     }
 
+    if ($ENV:APPVEYOR_REPO_PROVIDER -notlike 'github') {
+        Write-Output "Repo provider '$ENV:APPVEYOR_REPO_PROVIDER'. Skipping task"
+        return
+    }
+
+    if ($ENV:BHBranchName -eq "master") {
+        Write-Output "This task cannot be executed on the master branch. Skpping task"
+    }
+
+    If ($ENV:BHBuildSystem -eq 'AppVeyor') {
+        Write-Output "git config --global credential.helper store"
+        cmd /c "git config --global credential.helper store 2>&1"
+        
+        Add-Content "$ENV:USERPROFILE\.git-credentials" "https://$($ENV:gh_token):x-oauth-basic@github.com`n"
+        
+        Write-Output "git config --global user.email"
+        cmd /c "git config --global user.email ""$($ENV:BHProjectName)-$($ENV:BHBranchName)-$($ENV:BHBuildSystem)@jakkulabs.com"" 2>&1"
+        
+        Write-Output "git config --global user.name"
+        cmd /c "git config --global user.name ""AppVeyor"" 2>&1"
+        
+        Write-Output "git config --global core.autocrlf true"
+        cmd /c "git config --global core.autocrlf true 2>&1"
+    }
+    
+    Write-Output "git checkout $ENV:BHBranchName"
+    cmd /c "git checkout $ENV:BHBranchName 2>&1"
+
+    Write-Output "git pull recent commits from $ENV:BHBranchName"
+    cmd /c "git pull 2>&1"
+    
+    Write-Output "git add -A"
+    cmd /c "git add -A 2>&1"
+    
+    Write-Output "git commit -m"
+    cmd /c "git commit -m ""AppVeyor post-build commit [ci skip]"" 2>&1"
+    
+    Write-Output "git status"
+    cmd /c "git status 2>&1"
+    
+    Write-Output "git push origin $ENV:BHBranchName"    
+    cmd /c "git push origin $ENV:BHBranchName 2>&1"
+}
+
+#################
+# Task: Release #
+#################
+
+Task CreateArtifact {
+
+    # --- Create release directory
+    Write-Output "Creating Release Directory:"
+    $ReleaseDirectory = New-Item -Path "$($ENV:BHProjectPath)\Release\$($ModuleName)" -ItemType Directory -Force
+    Write-Output "  - $($ReleaseDirectory.FullName)"
+
+    # --- Copy accross the updated psd1 file
+    Write-Verbose "Copying Module Manifest"
+    $ModuleManifestSource = Get-Item -Path $ENV:BHPSModuleManifest
+    Copy-Item -Path $ModuleManifestSource.FullName -Destination "$($ReleaseDirectory.FullName)\$($ModuleName).psd1" -Force
+
+    # --- Create an empty psm1 file
+    Write-Output "Creating base PSM1 file"
+    $PSM1 = New-Item -Path "$($ReleaseDirectory.FullName)\$($ModuleName).psm1" -ItemType File -Force
+
+    # --- Get Current module version
+    $ModuleManifestVersion = Get-Metadata -Path $ENV:BHPSModuleManifest -PropertyName "ModuleVersion"
+
+    # --- Set psm1 content
+    $PSM1Header = @"
+<#                                              
+    - $($ModuleName) PowerShell Module v$($ModuleManifestVersion)
+    - $($RepositoryUrl)
+#>
+
+"@  
+
+    Set-Content -Path $PSM1.FullName -Value $PSM1Header -Encoding UTF8
+
+    # --- Process Functions
+    $Functions = Get-ChildItem -Path "$ENV:BHModulePath\Functions" -File -Recurse
+    Write-Output "Processing function:"
+    foreach ($Function in $Functions) {
+
+        Write-Output "  - $($Function.BaseName)"
+        $Content = Get-Content -Path $Function.FullName -Raw
+        $Definition = @"
+<#
+    - Function: $($Function.BaseName)
+#>
+
+$($Content)
+`n
+"@
+
+        $Body += $Definition
+        #Add-Content -Path $PSM1.FullName -Value $Definition -Encoding UTF8
+    }
+
+    Add-Content -Path $PSM1.FullName -Value $Body -Encoding UTF8
+
+    $ArtifactDestination = "$($ENV:BHProjectPath)\$($ENV:BHProjectName).v$($ModuleManifestVersion).zip"  
+
+    if ((Test-Path -Path $ArtifactDestination)) {
+        Remove-Item -Path $ArtifactDestination -Force | Out-Null
+    }
+
+    Write-Output "Compressing module: $($ArtifactDestination)"
+    Compress-Archive -Path $ReleaseDirectory.FullName -DestinationPath $ArtifactDestination -Force -Confirm:$false -Verbose:$VerbosePreference | Out-Null
+
+    if ($ENV:BHBuildSystem -eq "AppVeyor") {
+        Write-Output "Pushing asset to AppVeyor: $($ArtifactDestination)"
+        Push-AppveyorArtifact $ArtifactDestination
+    }
 }
 
 Task CreateGitHubRelease {
 
-    Set-GitHubSessionInformation -UserName $GitHubUsername -APIKey $GithubAPIKey -Verbose:$VerbosePreference | Out-Null
+    if ($ENV:BHBuildSystem -eq "Unknown"){
+        Write-Output "Could not detect build system. Skipping task"
+        return
+    }
 
-    $CurrentModuleVersion = (Import-PowerShellDataFile -Path $ModuleManifestPath).ModuleVersion
+    if ($ENV:APPVEYOR_REPO_PROVIDER -notlike 'github') {
+        Write-Output "Repo provider '$ENV:APPVEYOR_REPO_PROVIDER'. Skipping task"
+        return
+    }
 
-    Write-Verbose -Message "Current module version is $($CurrentModuleVersion)"
+    if ($ENV:BHBranchName -ne "master") {
+        Write-Output "Not in master branch. Skipping task"
+        return
+    }
 
-    $AssetPath = "$($OutDir)\$($ModuleName)-$($CurrentModuleVersion).zip"
+    Set-GitHubSessionInformation -UserName $OrgName -APIKey $ENV:gh_token -Verbose:$VerbosePreference | Out-Null
 
-    Write-Verbose -Message "Asset path is $($AssetPath)"
+    $ModuleManifestVersion = Get-Metadata -Path $ENV:BHPSModuleManifest -PropertyName "ModuleVersion"
 
+    try {
+        $GitHubRelease = Get-GitHubRelease -Repository $RepositoryName -Tag v$ModuleManifestVersion
+    }
+    catch {}
+
+    if ($GitHubRelease) {
+        Write-Output "A release with tag v$ModuleManifestVersion already exists. Skipping task"
+        return
+    }
+
+    $AssetPath = "$($ENV:BHProjectPath)\$($ENV:BHProjectName).v$($ModuleManifestVersion).zip"  
+    
     $Asset = @{
         "Path" = $AssetPath
         "Content-Type" = "application/zip"
     }
 
-    New-GitHubRelease -Repository $GithubRepositoryName -Name $ModuleName -Target $GitHubReleaseTarget -Tag "v$($CurrentModuleVersion)" -Assets $Asset -Verbose:$VerbosePreference -Confirm:$false | Out-Null
+    $GitHubReleaseManagerParameters = @{
+        Repository = $RepositoryName
+        Name = $ModuleName
+        Description = (Get-Content -Path "$ENV:BHProjectPath\RELEASE.md" -Raw)
+        Target = $ENV:BHBranchName
+        Tag = "v$($ModuleManifestVersion)"
+        Asset = $Asset
+    }
 
+    Write-Output "Creating GitHub release with the following parameters:"
+    Write-Output $GitHubReleaseManagerParameters
+
+    New-GitHubRelease @GitHubReleaseManagerParameters -Verbose:$VerbosePreference -Confirm:$false | Out-Null
 }
 
-Task PublishPSGallery {
+Task PublishToPSGallery {
 
-    Publish-Module -Path "$($OutDir)\$($ModuleName)" -NuGetApiKey $NuGetAPIKey -Verbose:$VerbosePreference
+    if ($ENV:BHBranchName -ne "master") {
+        Write-Output "Not in master branch. Skipping task"
+        return
+    }
 
+    $ModuleManifestVersion = Get-Metadata -Path $ENV:BHPSModuleManifest -PropertyName "ModuleVersion"
+    $PSGalleryModule = Find-Module -Name $ModuleName -RequiredVersion $ModuleManifestVersion -ErrorAction SilentlyContinue
+
+    if ($PSGalleryModule) {
+        Write-Output "Version $ModuleManifestVersion already exists in the PowerShell Gallery. Skipping task"
+        return
+    }   
+
+    Publish-Module -Path "$($ENV:BHProjectPath)\Release\$($ModuleName)" -NuGetApiKey $ENV:psg_token -Confirm:$false -Verbose:$VerbosePreference | Out-Null
 }

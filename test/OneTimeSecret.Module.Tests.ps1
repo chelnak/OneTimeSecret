@@ -1,12 +1,4 @@
-$SuppressImportModule = $false
-$ModuleManifestName = 'OneTimeSecret.psd1'
-$ModuleManifestPath = "$PSScriptRoot\..\src\$ModuleManifestName"
-
-if (!$SuppressImportModule) {
-    # -Scope Global is needed when running tests from inside of psake, otherwise
-    # the module's functions cannot be found in the OneTimeSecret\ namespace
-    Import-Module $ModuleManifestPath -Scope Global
-}
+Import-Module -Name $ENV:BHPSModuleManifest -Force -Global
 
 # --- Get test variables
 if ($ENV:APPVEYOR) {
@@ -19,12 +11,19 @@ if ($ENV:APPVEYOR) {
 
 }
 
-# --- Set OTSConnectionInformation as a global variable to avoide strange sessions state context issues
-$GLOBAL:OTSConnectionInformation = Set-OTSConnectionInformation -Username $Variables.Username -APIKey $Variables.APIKey
+# --- Set OTSAuthorizationToken as a global variable to avoide strange sessions state context issues
+Set-OTSAuthorizationToken -Username $Variables.Username -APIKey $Variables.APIKey
 
 Describe -Name 'Module Function Tests' {
 
     Context -Name "Public Functions" -Fixture {
+
+        It -Name "Retrieve OTSAuthorizationToken Variable" -Test {
+
+            $OTSAuthorizationToken = Get-OTSAuthorizationToken
+            $OTSAuthorizationToken.Authorization | Should Not Be $Null
+
+        }
 
         # --- CREATE
         It -Name "Create Secret" -Test {
@@ -102,5 +101,4 @@ Describe -Name 'Module Function Tests' {
 
 }
 
-Remove-Variable -Name OTSConnectionInformation -Scope Global -Force -ErrorAction SilentlyContinue
 Remove-Variable -Name Variables -Force -ErrorAction SilentlyContinue
