@@ -78,7 +78,7 @@ Describe -Name 'Module Function Tests' {
         It -Name "Return Recent Metadata" -Test {
 
             $RecentMetadata = Get-OTSRecentMetadata
-            $RecentMetadata | Should BeGreaterThan 0
+            $RecentMetadata.Count | Should BeGreaterThan 0
 
         }
 
