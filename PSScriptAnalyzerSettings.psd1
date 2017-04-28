@@ -1,34 +1,21 @@
 @{
-    # Use Severity when you want to limit the generated diagnostic records to a
-    # subset of: Error, Warning and Information.
-    # Uncomment the following line if you only want Errors and Warnings but
-    # not Information diagnostic records.
-    #Severity = @('Error','Warning')
+    ExcludeRules=@(
+        "PSAvoidUsingUserNameAndPassWordParams",
+        "PSAvoidGlobalVars"
+    )
+    
+    Severity=@(
+        "Warning",
+        "Error"
+    )
 
-    # Use IncludeRules when you want to run only a subset of the default rule set.
-    #IncludeRules = @('PSAvoidDefaultValueSwitchParameter',
-    #                 'PSMisleadingBacktick',
-    #                 'PSMissingModuleManifestField',
-    #                 'PSReservedCmdletChar',
-    #                 'PSReservedParams',
-    #                 'PSShouldProcess',
-    #                 'PSUseApprovedVerbs',
-    #                 'PSUseDeclaredVarsMoreThanAssigments')
+    Rules = @{
+        # https://github.com/PowerShell/PSScriptAnalyzer/blob/260a573e5e3f1ce8580c6ceb6f9089c7f1aadbc6/RuleDocumentation/UseCompatibleCmdlets.md
+        PSUseCompatibleCmdlets = @{Compatibility = @(
+            "core-6.0.0-alpha-linux",
+            "core-6.0.0-alpha-windows",
+            "core-6.0.0-alpha-osx"
+        )}
+    }
 
-    # Use ExcludeRules when you want to run most of the default set of rules except
-    # for a few rules you wish to "exclude".  Note: if a rule is in both IncludeRules
-    # and ExcludeRules, the rule will be excluded.
-    #ExcludeRules = @('PSAvoidUsingWriteHost')
-
-    # You can use the following entry to supply parameters to rules that take parameters.
-    # For instance, the PSAvoidUsingCmdletAliases rule takes a whitelist for aliases you
-    # want to allow.
-    #Rules = @{
-    #    Do not flag 'cd' alias.
-    #    PSAvoidUsingCmdletAliases = @{Whitelist = @('cd')}
-
-    #    Check if your script uses cmdlets that are compatible on PowerShell Core,
-    #    version 6.0.0-alpha, on Linux.
-    #    PSUseCompatibleCmdlets = @{Compatibility = @("core-6.0.0-alpha-linux")}
-    #}
 }
