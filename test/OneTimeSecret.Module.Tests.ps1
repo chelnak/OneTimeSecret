@@ -77,16 +77,10 @@ Describe -Name 'Module Function Tests' {
 
         }
 
-        It -Name "Return Recent Metadat Should Fail" -Test {
+        It -Name "Return Recent Metadata" -Test {
 
-            try {
-
-                $RecentMetadata = Get-OTSRecentMetadata
-
-            } catch {}
-
-
-            $RecentMetadata | Should Be $null
+            $RecentMetadata = Get-OTSRecentMetadata
+            $RecentMetadata | Should BeGreaterThan 0
 
         }
 
