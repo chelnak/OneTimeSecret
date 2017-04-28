@@ -28,7 +28,8 @@ New-OTSSharedSecret -Secret "Very Secret" -Passphrase 1234 -Ttl 90000 -Recipient
 ## PARAMETERS
 
 ### -Secret
-{{Fill Secret Description}}
+The secret value which is encrypted before being stored.
+There is a maximum length based on your plan that is enforced (1k-10k
 
 ```yaml
 Type: String
