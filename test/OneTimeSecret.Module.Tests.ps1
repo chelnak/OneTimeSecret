@@ -32,9 +32,7 @@ Describe -Name 'Module Function Tests' {
 
                 Passphrase = $Variables.Passphrase
                 Recipient = $Variables.Recipient
-                Ttl = $Variables.Ttl
-                MetadataTtl = $Variables.MetadataTtl
-                SecretTtl = $Variables.SecretTtl
+                Ttl = $Variables.Ttls
             }
 
             $Secret = New-OTSSecret @Param

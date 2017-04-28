@@ -5,7 +5,7 @@ branches:
   - development
 environment:
   TestVariables:
-    secure: SNbiIrjKaGL3EUurLoHYHIw67MDCQWaTHTQBWR3Gi9sMf6hIW+rinrcxnhohpfmDdPKrzFYBKiWg5ne1VNxThC8EcxwL/zH5kU4UdoqhAC9WsxjGrAQJdCeQLEf/nb4UJDuC7P0iWELzhaRZGK+CE3iBq6j8TE0+j/+0Nm/Kwox97pjj19SBps8VURDuUSBXv6NkTcKvyMYts1D1Io79BzC8qiPH89PC01J+uZuigAV61x+5JdMfzcH5hsXYq2IyOzmeGs/NGiW43ZdhvU6CjoAGfLFAkPZDh2pyBtKGlj3Os1/Zi2EbFthBnnLNUHjK7pd4wCCC9f2cgsAL6mLnXU3dquX7iAKREjd7+wF9xTB5KR+u/Af7LuaTxrS2DBu6
+    secure: SNbiIrjKaGL3EUurLoHYHIw67MDCQWaTHTQBWR3Gi9sMf6hIW+rinrcxnhohpfmDdPKrzFYBKiWg5ne1VNxThC8EcxwL/zH5kU4UdoqhAC9WsxjGrAQJdCeQLEf/nb4UJDuC7P0iWELzhaRZGK+CE3iBq6j8TE0+j/+0Nm/Kwox97pjj19SBps8VURDuUSBXv6NkTcKvyMYts1D1Io79BzC8qiPH89PC01J+uZuigAV61x+5JdMfzcH5hsXYq2Iycxm2PuiA/c7D6nyHL/FhOChySajdyKOEsdNHRyF8uutMj1tJUn/zFaz+1kvCclH2
   gh_token:
     secure: Zp+1OaziEY3qRLb2m0fodp+pmezszMM4aE5ZcXcWJgMcAOa5gxjdVNWKT5Ve3xt4
   psg_token:
