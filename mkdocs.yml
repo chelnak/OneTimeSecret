@@ -17,4 +17,5 @@ pages:
     - Get-OTSSystemStatus : functions/Get-OTSSystemStatus.md
     - New-OTSSecret : functions/New-OTSSecret.md
     - New-OTSSharedSecret : functions/New-OTSSharedSecret.md
+    - Remove-OTSSecret : functions/Remove-OTSSecret.md
     - Set-OTSAuthorizationToken : functions/Set-OTSAuthorizationToken.md

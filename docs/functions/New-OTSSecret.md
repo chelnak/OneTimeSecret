@@ -7,8 +7,7 @@ This is useful for temporary passwords, one-time pads, salts, etc.
 ## SYNTAX
 
 ```
-New-OTSSecret [-Passphrase] <String> [[-Ttl] <String>] [[-MetadataTtl] <String>] [[-SecretTtl] <String>]
- [[-Recipient] <String>] [-WhatIf] [-Confirm]
+New-OTSSecret [-Passphrase] <String> [[-Ttl] <String>] [[-Recipient] <String>] [-WhatIf] [-Confirm]
 ```
 
 ## DESCRIPTION
@@ -57,36 +56,6 @@ Aliases:
 
 Required: False
 Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -MetadataTtl
-The remaining time (in seconds) that the metadata has left to live.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases: 
-
-Required: False
-Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -SecretTtl
-The remaining time (in seconds) that the secret has left to live.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases: 
-
-Required: False
-Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
