@@ -46,7 +46,7 @@ function Get-OTSSecret {
             $URI = "$($URI)?passphrase=$($Passphrase)"
         }
 
-        $Response = Invoke-OTSRestMethod -Method POST -URI $URI -Verbose:$VerbosePreference
+        $Response = InvokeOTSRestMethod -Method POST -URI $URI -Verbose:$VerbosePreference
 
         [PSCustomObject]@{
 

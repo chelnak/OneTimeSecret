@@ -25,7 +25,7 @@ function Get-OTSSystemStatus {
 
     try {
 
-        $Response = Invoke-OTSRestMethod -Method GET -URI $URI -Verbose:$VerbosePreference
+        $Response = InvokeOTSRestMethod -Method GET -URI $URI -Verbose:$VerbosePreference
 
         [PSCustomObject]@{
 

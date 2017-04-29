@@ -72,7 +72,7 @@ function New-OTSSharedSecret {
 
         if ($PSCmdlet.ShouldProcess("onetimesecret.com")){
 
-            $Response = Invoke-OTSRestMethod -Method POST -URI $URI -Verbose:$VerbosePreference
+            $Response = InvokeOTSRestMethod -Method POST -URI $URI -Verbose:$VerbosePreference
 
             [PSCustomObject]@{
 
@@ -83,8 +83,8 @@ function New-OTSSharedSecret {
                 MetadataTtl = $Response.metadata_ttl
                 SecretTtl = $Response.secret_ttl
                 State = $Response.state
-                Updated = (ConvertFrom-UnixTime -UnixTime $Response.updated).ToString()
-                Created = (ConvertFrom-UnixTime -UnixTime $Response.created).ToString()
+                Updated = (ConvertFromUnixTime -UnixTime $Response.updated).ToString()
+                Created = (ConvertFromUnixTime -UnixTime $Response.created).ToString()
                 Recipient = $Response.recipient
                 PassphraseRequired = $Response.passphrase_required
 

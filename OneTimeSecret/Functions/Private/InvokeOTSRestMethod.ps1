@@ -1,4 +1,4 @@
-function Invoke-OTSRestMethod {
+function InvokeOTSRestMethod {
 <#
     .SYNOPSIS
     A module specific wrapper for Invoke-ResetMethod
@@ -25,7 +25,7 @@ function Invoke-OTSRestMethod {
     System.Management.Automation.PSObject
 
     .EXAMPLE
-    Invoke-OTSRestMethod -Method POST -URI /v1/generate?passphrase=1234"
+    InvokeOTSRestMethod -Method POST -URI /v1/generate?passphrase=1234"
 
 #>
 [CmdletBinding()][OutputType('System.Management.Automation.PSObject')]

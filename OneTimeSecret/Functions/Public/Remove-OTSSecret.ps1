@@ -37,7 +37,7 @@ function Remove-OTSSecret {
 
         if ($PSCmdlet.ShouldProcess("onetimesecret.com")){
 
-            $Response = (Invoke-OTSRestMethod -Method POST -URI $URI -Verbose:$VerbosePreference).state
+            $Response = (InvokeOTSRestMethod -Method POST -URI $URI -Verbose:$VerbosePreference).state
 
             [PSCustomObject]@{
 
@@ -48,8 +48,8 @@ function Remove-OTSSecret {
                 MetadataTtl = $Response.metadata_ttl
                 SecretTtl = $Response.secret_ttl
                 State = $Response.state
-                Updated = (ConvertFrom-UnixTime -UnixTime $Response.updated).ToString()
-                Created = (ConvertFrom-UnixTime -UnixTime $Response.created).ToString()
+                Updated = (ConvertFromUnixTime -UnixTime $Response.updated).ToString()
+                Created = (ConvertFromUnixTime -UnixTime $Response.created).ToString()
                 Recipient = $Response.recipient
                 PassphraseRequired = $Response.passphrase_required
             }
