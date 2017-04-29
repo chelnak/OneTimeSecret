@@ -33,8 +33,6 @@ Describe -Name 'Module Function Tests' {
                 Passphrase = $Variables.Passphrase
                 Recipient = $Variables.Recipient
                 Ttl = $Variables.Ttl
-                MetadataTtl = $Variables.MetadataTtl
-                SecretTtl = $Variables.SecretTtl
             }
 
             $Secret = New-OTSSecret @Param
@@ -77,16 +75,10 @@ Describe -Name 'Module Function Tests' {
 
         }
 
-        It -Name "Return Recent Metadat Should Fail" -Test {
+        It -Name "Return Recent Metadata" -Test {
 
-            try {
-
-                $RecentMetadata = Get-OTSRecentMetadata
-
-            } catch {}
-
-
-            $RecentMetadata | Should Be $null
+            $RecentMetadata = Get-OTSRecentMetadata
+            $RecentMetadata.Count | Should BeGreaterThan 0
 
         }
 

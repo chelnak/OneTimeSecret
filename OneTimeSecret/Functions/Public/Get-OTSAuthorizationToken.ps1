@@ -10,13 +10,13 @@ function Get-OTSAuthorizationToken {
     None
 
     .OUTPUTS
-    System.String
+    System.Management.Automation.PSObject
 
     .Example
     Get-OTSAuthorizationToken
 
 #>
-[CmdletBinding()][OutputType('System.String')]
+[CmdletBinding()][OutputType('System.Management.Automation.PSObject')]
 
     Param ()
 
@@ -26,16 +26,12 @@ function Get-OTSAuthorizationToken {
         if (!$Script:OTSConnectionInformation) {
 
             throw "Could not find OTSConnectionInformation. Please run Set-OTSAuthorizationToken first"
-
         }
 
         Write-Output $Script:OTSConnectionInformation
-
     }
     catch {
 
-        throw
-
+        throw $_
     }
-
 }

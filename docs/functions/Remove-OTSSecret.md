@@ -1,28 +1,30 @@
-# Set-OTSAuthorizationToken
+# Remove-OTSSecret
 
 ## SYNOPSIS
-Create the Authorization information required to interact with the OneTimeSecret.com API
+Burn a secren that has not been read yet.
 
 ## SYNTAX
 
 ```
-Set-OTSAuthorizationToken [-Username] <String> [-APIKey] <String> [-WhatIf] [-Confirm]
+Remove-OTSSecret [-MetadataKey] <String> [-WhatIf] [-Confirm]
 ```
 
 ## DESCRIPTION
-Create the Authorization information required to interact with the OneTimeSecret.com API
+Burn a secren that has not been read yet.
+
+Secrets with passphrases are currently not supported by this function
 
 ## EXAMPLES
 
 ### -------------------------- EXAMPLE 1 --------------------------
 ```
-Set-OTSAuthorizationToken -Username user@mail.com -APIKey 52302308erf2e799affd33cbc7c85896b4c6a6997
+Remove-OTSSecret -MetaDataKey allrfe8gf7edstynihtvrblgfuhbbuz
 ```
 
 ## PARAMETERS
 
-### -Username
-The Username of the account
+### -MetadataKey
+The unique key for the metadata
 
 ```yaml
 Type: String
@@ -32,22 +34,7 @@ Aliases:
 Required: True
 Position: 1
 Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -APIKey
-The API key for the account
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases: 
-
-Required: True
-Position: 2
-Default value: None
-Accept pipeline input: False
+Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 

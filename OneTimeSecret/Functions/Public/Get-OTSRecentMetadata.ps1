@@ -6,8 +6,6 @@ function Get-OTSRecentMetadata {
     .DESCRIPTION
     Return recent secret metadata
 
-    This function will not currently work due to an error with the OneTimeSecret.com API
-
     .OUTPUTS
     System.Management.Automation.PSObject
 
@@ -20,34 +18,32 @@ function Get-OTSRecentMetadata {
     Param ()
 
     # --- Set URI with mandatory query parameters
-    $URI = "/v1/recent"
+    $URI =  "/v1/private/recent"
 
     try {
 
-        $Response = Invoke-OTSRestMethod -Method POST -URI $URI -Verbose:$VerbosePreference
+        $Response = InvokeOTSRestMethod -Method GET -URI $URI -Verbose:$VerbosePreference
 
-        [PSCustomObject]@{
+        foreach ($Metadata in $Response) {
 
-            Custid = $Response.custid
-            MetadataKey = $Response.metadata_key
-            SecretKey = $Response.secret_key
-            Ttl = $Response.ttl
-            MetadataTtl = $Response.metadata_ttl
-            SecretTtl = $Response.secret_ttl
-            State = $Response.state
-            Updated = (ConvertFrom-UnixTime -UnixTime $Response.updated).ToString()
-            Created = (ConvertFrom-UnixTime -UnixTime $Response.created).ToString()
-            Recipient = $Response.recipient
-            PassphraseRequired = $Response.passphrase_required
+            [PSCustomObject]@{
 
+                Custid = $Metadata.custid
+                MetadataKey = $Metadata.metadata_key
+                SecretKey = $Metadata.secret_key
+                Ttl = $Metadata.ttl
+                MetadataTtl = $Metadata.metadata_ttl
+                SecretTtl = $Metadata.secret_ttl
+                State = $Metadata.state
+                Updated = (ConvertFromUnixTime -UnixTime $Metadata.updated).ToString()
+                Created = (ConvertFromUnixTime -UnixTime $Metadata.created).ToString()
+                Recipient = $Metadata.recipient
+                PassphraseRequired = $Metadata.passphrase_required
+            }
         }
-
-
     }
     catch {
 
-        throw
-
+        throw $_
     }
-
 }

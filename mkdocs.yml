@@ -9,7 +9,6 @@ copyright: "OneTimeSecret is licenced under the <a href='https://github.com/chel
 pages:
 - 'Home' : 'index.md'
 - 'Change log' : 'CHANGELOG.md'
-- 'Build' : 'build.md'
 - 'Functions':
     - Get-OTSAuthorizationToken : functions/Get-OTSAuthorizationToken.md
     - Get-OTSRecentMetadata : functions/Get-OTSRecentMetadata.md
@@ -18,4 +17,5 @@ pages:
     - Get-OTSSystemStatus : functions/Get-OTSSystemStatus.md
     - New-OTSSecret : functions/New-OTSSecret.md
     - New-OTSSharedSecret : functions/New-OTSSharedSecret.md
+    - Remove-OTSSecret : functions/Remove-OTSSecret.md
     - Set-OTSAuthorizationToken : functions/Set-OTSAuthorizationToken.md

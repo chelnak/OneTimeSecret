@@ -12,12 +12,6 @@ function New-OTSSecret {
     .PARAMETER Ttl
     The maximum amount of time, in seconds, that the secret should survive (i.e. time-to-live). Once this time expires, the secret will be deleted and not recoverable.
 
-    .PARAMETER MetadataTtl
-    The remaining time (in seconds) that the metadata has left to live.
-
-    .PARAMETER SecretTtl
-    The remaining time (in seconds) that the secret has left to live.
-
     .PARAMETER Recipient
     An email address. We will send a friendly email containing the secret link (NOT the secret itself).
 
@@ -46,18 +40,9 @@ function New-OTSSecret {
         [ValidateNotNullOrEmpty()]
         [String]$Ttl,
 
-        [Parameter(Position=2)]
-        [ValidateNotNullOrEmpty()]
-        [String]$MetadataTtl,
-
-        [Parameter(Position=3)]
-        [ValidateNotNullOrEmpty()]
-        [String]$SecretTtl,
-
         [Parameter(Position=4)]
         [ValidateNotNullOrEmpty()]
         [String]$Recipient
-
     )
 
     # --- Set URI with mandatory query parameters
@@ -68,63 +53,38 @@ function New-OTSSecret {
         if ($PSBoundParameters.ContainsKey("Ttl")){
 
             Write-Verbose -Message "Adding Ttl Query Parameter"
-
             $URI = "$($URI)&ttl=$($Ttl)"
-
-        }
-
-        if ($PSBoundParameters.ContainsKey("MetadataTtl")){
-
-            Write-Verbose -Message "Adding MetadataTtl Query Parameter"
-
-            $URI = "$($URI)&metadata_ttl=$($MetadataTtl)"
-
-        }
-
-        if ($PSBoundParameters.ContainsKey("SecretTtl")){
-
-            Write-Verbose -Message "Adding SecretTtl Query Parameter"
-
-            $URI = "$($URI)&secret_ttl=$($SecretTtl)"
-
         }
 
         if ($PSBoundParameters.ContainsKey("Recipient")) {
 
             Write-Verbose -Message "Adding Recipient Parameter"
-
             $URI = "$($URI)&recipient=$($Recipient)"
-
         }
 
         if ($PSCmdlet.ShouldProcess("onetimesecret.com")){
 
-            $Response = Invoke-OTSRestMethod -Method POST -URI $URI -Verbose:$VerbosePreference
+            $Response = InvokeOTSRestMethod -Method POST -URI $URI -Verbose:$VerbosePreference
 
+            [PSCustomObject]@{
+
+                CustId = $Response.custid
+                MetadataKey = $Response.metadata_key
+                SecretKey = $Response.secret_key
+                Ttl = $Response.ttl
+                MetadataTtl = $Response.metadata_ttl
+                SecretTtl = $Response.secret_ttl
+                State = $Response.state
+                Updated = (ConvertFromUnixTime -UnixTime $Response.updated).ToString()
+                Created = (ConvertFromUnixTime -UnixTime $Response.created).ToString()
+                Recipient = $Response.recipient
+                Value = $Response.value
+                PassphraseRequired = $Response.passphrase_required
+            }
         }
-
-        [PSCustomObject]@{
-
-            CustId = $Response.custid
-            MetadataKey = $Response.metadata_key
-            SecretKey = $Response.secret_key
-            Ttl = $Response.ttl
-            MetadataTtl = $Response.metadata_ttl
-            SecretTtl = $Response.secret_ttl
-            State = $Response.state
-            Updated = (ConvertFrom-UnixTime -UnixTime $Response.updated).ToString()
-            Created = (ConvertFrom-UnixTime -UnixTime $Response.created).ToString()
-            Recipient = $Response.recipient
-            Value = $Response.value
-            PassphraseRequired = $Response.passphrase_required
-
-        }
-
     }
     catch {
 
-        throw
-
+        throw $_
     }
-
 }

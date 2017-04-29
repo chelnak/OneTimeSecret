@@ -27,7 +27,7 @@ Get-OTSAuthorizationToken
 
 ## OUTPUTS
 
-### System.String
+### System.Management.Automation.PSObject
 
 ## NOTES
 

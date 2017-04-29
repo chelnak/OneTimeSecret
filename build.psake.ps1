@@ -177,10 +177,12 @@ Task IncrementVersion {
 
     if ($ENV:BHBranchName -eq "master") {
         Write-Output "This task cannot be executed on the master branch. Skpping task"
+        return
     }
 
     if (!$StepVersion) {
         Write-Output "StepVersion not specified. Skipping task"
+        return
     }
 
     if ([version]$StepVersion -gt [version]$CurrentVersion) {
