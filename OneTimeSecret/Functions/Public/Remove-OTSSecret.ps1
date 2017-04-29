@@ -57,6 +57,6 @@ function Remove-OTSSecret {
     }
     catch {
 
-        throw $_
+        throw "$_ - This command does not support secrets with passphrases!"
     }
 }
