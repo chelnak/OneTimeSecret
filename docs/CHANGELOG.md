@@ -8,7 +8,6 @@
 * Implements Remove-OTSSecret for new burn API
 * Fixes Get-OTSRecentMetadata
 * Build and deploy improvements
-* Fixes module tests
+* Improves tests by adding help tests
 * Documentation updates
-
-
+* Renamed private functions
