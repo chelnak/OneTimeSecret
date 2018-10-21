@@ -12,6 +12,9 @@ function Invoke-OTSRestMethod {
     .PARAMETER URI
     Service URI
 
+    .PARAMETER QueryStringParameters
+    A hashtable of query string parameters
+
     .PARAMETER Body
     Payload for the request, if applicable
 
@@ -25,7 +28,15 @@ function Invoke-OTSRestMethod {
     System.Management.Automation.PSObject
 
     .EXAMPLE
-    InvokeOTSRestMethod -Method POST -URI /v1/generate?passphrase=1234"
+    InvokeOTSRestMethod -Method POST -URI /v1/generate
+
+    ?passphrase=1234"
+
+    .EXAMPLE
+    $QueryStringParameters = @{
+        passphrase = "1234"
+    }
+    InvokeOTSRestMethod -Method POST -URI /v1/generate -QueryStringParameters $QueryStringParameters
 
 #>
     [CmdletBinding()][OutputType('System.Management.Automation.PSObject')]
