@@ -7,7 +7,9 @@ Properties {
 # ----------------- General -------------------------------------
     $DocsDirectory = "$ENV:BHProjectPath\docs"
     $ModuleName = "OneTimeSecret"
-    $ModuleAuthor = "Chelnak"
+    $ModuleAuthor = "chelnak"
+    $ReleaseDirectoryPath = "$($ENV:BHProjectPath)\Release\$($ModuleName)"
+    $ModuleManifestVersion = "0.0.0"
 
 # ----------------- Script Analyzer ------------------------------
     # Should be Warning by default. Can be overridden on demand by using
@@ -18,6 +20,6 @@ Properties {
 
 # ----------------- GitHub ---------------------------------------
     $OrgName = "chelnak"
-    $RepositoryName = "OneTimeSecret"
-    $RepositoryUrl = "https://github.com/chelnak/OneTimeSecret"
+    $RepositoryName = "onetimesecret"
+    $RepositoryUrl = "https://github.com/chelnak/onetimesecret"
 }
