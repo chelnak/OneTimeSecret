@@ -2,6 +2,7 @@
 .gittoken
 .nugetapikey
 test/Variables.json
+*.xml
 
 # Folders
 Release/
