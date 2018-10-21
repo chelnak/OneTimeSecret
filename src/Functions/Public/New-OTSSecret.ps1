@@ -1,5 +1,5 @@
 function New-OTSSecret {
-<#
+    <#
     .SYNOPSIS
     Generate a short, unique secret. This is useful for temporary passwords, one-time pads, salts, etc.
 
@@ -28,57 +28,62 @@ function New-OTSSecret {
     New-OTSSecret -Passphrase 1234 -Ttl 90000 -MetadataTtl 90000 -SecretTtil 90000 -Recipient user@mail.com
 
 #>
-[CmdletBinding(SupportsShouldProcess,ConfirmImpact="Low")][OutputType('System.Management.Automation.PSObject')]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = "Low")][OutputType('System.Management.Automation.PSObject')]
 
     Param (
 
-        [Parameter(Mandatory=$true, Position=0)]
+        [Parameter(Mandatory = $false, Position = 0)]
         [ValidateNotNullOrEmpty()]
         [String]$Passphrase,
 
-        [Parameter(Position=1)]
+        [Parameter(Mandatory = $false, Position = 1)]
         [ValidateNotNullOrEmpty()]
         [String]$Ttl,
 
-        [Parameter(Position=4)]
+        [Parameter(Mandatory = $false, Position = 4)]
         [ValidateNotNullOrEmpty()]
         [String]$Recipient
     )
 
     # --- Set URI with mandatory query parameters
-    $URI = "/v1/generate?passphrase=$($Passphrase)"
+    $URI = "v1/generate"
 
     try {
 
-        if ($PSBoundParameters.ContainsKey("Ttl")){
+        $QueryStringParameters = @{}
+        if ($PSBoundParameters.ContainsKey("Passphrase")) {
+            Write-Verbose -Message "Adding Passphrase Query Parameter"
+            $QueryStringParameters.Add("passphrase", $Passphrase)
+        }
 
+        if ($PSBoundParameters.ContainsKey("Ttl")) {
             Write-Verbose -Message "Adding Ttl Query Parameter"
-            $URI = "$($URI)&ttl=$($Ttl)"
+            $QueryStringParameters.Add("ttl", $Ttl)
         }
 
         if ($PSBoundParameters.ContainsKey("Recipient")) {
 
             Write-Verbose -Message "Adding Recipient Parameter"
-            $URI = "$($URI)&recipient=$($Recipient)"
+            $QueryStringParameters.Add("recipient", $Recipient)
         }
 
-        if ($PSCmdlet.ShouldProcess("onetimesecret.com")){
+        if ($PSCmdlet.ShouldProcess("onetimesecret.com")) {
 
-            $Response = InvokeOTSRestMethod -Method POST -URI $URI -Verbose:$VerbosePreference
+            $Response = Invoke-OTSRestMethod -Method POST -URI $URI -QueryStringParameters $QueryStringParameters -Verbose:$VerbosePreference
 
             [PSCustomObject]@{
 
-                CustId = $Response.custid
-                MetadataKey = $Response.metadata_key
-                SecretKey = $Response.secret_key
-                Ttl = $Response.ttl
-                MetadataTtl = $Response.metadata_ttl
-                SecretTtl = $Response.secret_ttl
-                State = $Response.state
-                Updated = (ConvertFromUnixTime -UnixTime $Response.updated).ToString()
-                Created = (ConvertFromUnixTime -UnixTime $Response.created).ToString()
-                Recipient = $Response.recipient
-                Value = $Response.value
+                CustId             = $Response.custid
+                MetadataKey        = $Response.metadata_key
+                SecretKey          = $Response.secret_key
+                Ttl                = $Response.ttl
+                MetadataTtl        = $Response.metadata_ttl
+                SecretTtl          = $Response.secret_ttl
+                State              = $Response.state
+                Updated            = (ConvertFrom-UnixTime -UnixTime $Response.updated).ToString()
+                Created            = (ConvertFrom-UnixTime -UnixTime $Response.created).ToString()
+                Recipient          = $Response.recipient
+                Value              = $Response.value
                 PassphraseRequired = $Response.passphrase_required
             }
         }
