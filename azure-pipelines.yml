@@ -1,3 +1,4 @@
+name: '$(Major).$(Minor).$(Patch)-$(Rev:r)'
 pool:
   vmImage: 'vs2017-win2016'
 
