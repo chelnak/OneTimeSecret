@@ -106,8 +106,7 @@ function Invoke-OTSRestMethod {
     finally {
 
         if ($PSVersionTable.PSEdition -eq "Desktop") {
-
-            $ServicePoint = [System.Net.ServicePointManager]::FindServicePoint($FullURI)
+            $ServicePoint = [System.Net.ServicePointManager]::FindServicePoint("$($UriBuilder.Scheme)://$($UriBuilder.Host)")
             $ServicePoint.CloseConnectionGroup("") | Out-Null
 
         }
