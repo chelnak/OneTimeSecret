@@ -1,15 +1,16 @@
 ---
 
 site_name: OneTimeSecret
-repo_url: https://github.com/chelnak/OneTimeSecret
-site_author: Chelnak
+repo_url: https://github.com/chelnak/onetimesecret
+site_author: chelnak
 edit_uri: edit/master/docs/
 theme: readthedocs
-copyright: "OneTimeSecret is licenced under the <a href='https://github.com/chelnak/OneTimeSecret/raw/master/LICENSE'>MIT license"
+copyright: "OneTimeSecret is licensed under the <a href='https://github.com/chelnak/onetimesecret/raw/master/LICENSE'>MIT license"
 pages:
 - 'Home' : 'index.md'
 - 'Change log' : 'CHANGELOG.md'
-- 'Functions':
+- 'Build' : 'build.md'
+- 'Functions': 
     - Get-OTSAuthorizationToken : functions/Get-OTSAuthorizationToken.md
     - Get-OTSRecentMetadata : functions/Get-OTSRecentMetadata.md
     - Get-OTSSecret : functions/Get-OTSSecret.md

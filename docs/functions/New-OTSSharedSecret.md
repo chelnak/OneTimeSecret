@@ -6,7 +6,7 @@ Store and share a secret value
 ## SYNTAX
 
 ```
-New-OTSSharedSecret [-Secret] <String> [-Passphrase] <String> [[-Ttl] <String>] [[-Recipient] <String>]
+New-OTSSharedSecret [-Secret] <String> [[-Passphrase] <String>] [[-Ttl] <String>] [[-Recipient] <String>]
  [-WhatIf] [-Confirm]
 ```
 
@@ -52,7 +52,7 @@ Type: String
 Parameter Sets: (All)
 Aliases: 
 
-Required: True
+Required: False
 Position: 2
 Default value: None
 Accept pipeline input: False

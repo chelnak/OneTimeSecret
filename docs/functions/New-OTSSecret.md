@@ -7,7 +7,7 @@ This is useful for temporary passwords, one-time pads, salts, etc.
 ## SYNTAX
 
 ```
-New-OTSSecret [-Passphrase] <String> [[-Ttl] <String>] [[-Recipient] <String>] [-WhatIf] [-Confirm]
+New-OTSSecret [[-Passphrase] <String>] [[-Ttl] <String>] [[-Recipient] <String>] [-WhatIf] [-Confirm]
 ```
 
 ## DESCRIPTION
@@ -37,7 +37,7 @@ Type: String
 Parameter Sets: (All)
 Aliases: 
 
-Required: True
+Required: False
 Position: 1
 Default value: None
 Accept pipeline input: False
