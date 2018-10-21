@@ -1,5 +1,4 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/qbhbapqr9xt24413?svg=true)](https://ci.appveyor.com/project/chelnak/onetimesecret)
-
+[![Build Status](https://craigg.visualstudio.com/PowerShell%20Module%20Pipelines/_apis/build/status/OneTimeSecret)](https://craigg.visualstudio.com/PowerShell%20Module%20Pipelines/_build/latest?definitionId=14)
 # OneTimeSecret
 
 A PowerShell module for OneTimeSecret.com
