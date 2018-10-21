@@ -30,11 +30,11 @@ function Get-OTSSecretMetadata {
     )
 
     # --- Set URI with mandatory query parameters
-    $URI = "/v1/private/$($MetadataKey)"
+    $URI = "v1/private/$($MetadataKey)"
 
     try {
 
-        $Response = InvokeOTSRestMethod -Method POST -URI $URI -Verbose:$VerbosePreference
+        $Response = Invoke-OTSRestMethod -Method POST -URI $URI -Verbose:$VerbosePreference
 
         [PSCustomObject]@{
 
@@ -45,8 +45,8 @@ function Get-OTSSecretMetadata {
             MetadataTtl = $Response.metadata_ttl
             SecretTtl = $Response.secret_ttl
             State = $Response.state
-            Updated = (ConvertFromUnixTime -UnixTime $Response.updated).ToString()
-            Created = (ConvertFromUnixTime -UnixTime $Response.created).ToString()
+            Updated = (ConvertFrom-UnixTime -UnixTime $Response.updated).ToString()
+            Created = (ConvertFrom-UnixTime -UnixTime $Response.created).ToString()
             Recipient = $Response.recipient
             PassphraseRequired = $Response.passphrase_required
         }

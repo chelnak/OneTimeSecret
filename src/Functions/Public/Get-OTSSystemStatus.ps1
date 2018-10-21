@@ -21,11 +21,11 @@ function Get-OTSSystemStatus {
     Param ()
 
     # --- Set URI with mandatory query parameters
-    $URI = "/v1/status"
+    $URI = "v1/status"
 
     try {
 
-        $Response = InvokeOTSRestMethod -Method GET -URI $URI -Verbose:$VerbosePreference
+        $Response = Invoke-OTSRestMethod -Method GET -URI $URI -Verbose:$VerbosePreference
 
         [PSCustomObject]@{
 

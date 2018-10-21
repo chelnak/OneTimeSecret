@@ -30,23 +30,23 @@ function Get-OTSSecret {
         [ValidateNotNullOrEmpty()]
         [String]$SecretKey,
 
-        [Parameter(Position=1)]
+        [Parameter(Mandatory=$false, Position=1)]
         [ValidateNotNullOrEmpty()]
         [String]$Passphrase
     )
 
     # --- Set URI with mandatory query parameters
-    $URI = "/v1/secret/$($SecretKey)"
+    $URI = "v1/secret/$($SecretKey)"
 
     try {
 
-        if ($PSBoundParameters.ContainsKey("Passphrase")){
-
+        $QueryStringParameters = @{}
+        if ($PSBoundParameters.ContainsKey("Passphrase")) {
             Write-Verbose -Message "Adding Passphrase Query Parameter"
-            $URI = "$($URI)?passphrase=$($Passphrase)"
+            $QueryStringParameters.Add("passphrase", $Passphrase)
         }
 
-        $Response = InvokeOTSRestMethod -Method POST -URI $URI -Verbose:$VerbosePreference
+        $Response = Invoke-OTSRestMethod -Method POST -URI $URI -QueryStringParameters $QueryStringParameters -Verbose:$VerbosePreference
 
         [PSCustomObject]@{
 

@@ -18,11 +18,11 @@ function Get-OTSRecentMetadata {
     Param ()
 
     # --- Set URI with mandatory query parameters
-    $URI =  "/v1/private/recent"
+    $URI =  "v1/private/recent"
 
     try {
 
-        $Response = InvokeOTSRestMethod -Method GET -URI $URI -Verbose:$VerbosePreference
+        $Response = Invoke-OTSRestMethod -Method GET -URI $URI -Verbose:$VerbosePreference
 
         foreach ($Metadata in $Response) {
 
@@ -35,8 +35,8 @@ function Get-OTSRecentMetadata {
                 MetadataTtl = $Metadata.metadata_ttl
                 SecretTtl = $Metadata.secret_ttl
                 State = $Metadata.state
-                Updated = (ConvertFromUnixTime -UnixTime $Metadata.updated).ToString()
-                Created = (ConvertFromUnixTime -UnixTime $Metadata.created).ToString()
+                Updated = (ConvertFrom-UnixTime -UnixTime $Metadata.updated).ToString()
+                Created = (ConvertFrom-UnixTime -UnixTime $Metadata.created).ToString()
                 Recipient = $Metadata.recipient
                 PassphraseRequired = $Metadata.passphrase_required
             }
