@@ -1,7 +1,7 @@
 # Files
 .gittoken
 .nugetapikey
-test/Variables.json
+tests/Variables.json
 *.xml
 
 # Folders
