@@ -1,8 +1,6 @@
-## Breaking changes
-* Set-OTSConnectionInformation is now Set-OTSAuthorizationToken
-* Get-OTSConnectionInformation is now Get-OTSAuthorizationToken
-
 ## Fixes / Improvements
-* Build and deploy improvements
-* Fixes module tests
-* Documentation updates
+* Fixed #7
+* ConvertFromUnixTime renamed to ConvertFrom-UnixTime
+* InvokeOTSRestMethod renamed to Invoke-OTSRestMethod
+* Enhanced the way query string parameters are handled
+* Build improvements
