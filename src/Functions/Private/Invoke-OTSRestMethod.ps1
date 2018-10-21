@@ -1,5 +1,5 @@
-function InvokeOTSRestMethod {
-<#
+function Invoke-OTSRestMethod {
+    <#
     .SYNOPSIS
     A module specific wrapper for Invoke-ResetMethod
 
@@ -28,51 +28,64 @@ function InvokeOTSRestMethod {
     InvokeOTSRestMethod -Method POST -URI /v1/generate?passphrase=1234"
 
 #>
-[CmdletBinding()][OutputType('System.Management.Automation.PSObject')]
+    [CmdletBinding()][OutputType('System.Management.Automation.PSObject')]
 
     Param (
 
-        [Parameter(Mandatory=$true)]
-        [ValidateSet("GET","POST","PUT","DELETE")]
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("GET", "POST", "PUT", "DELETE")]
         [String]$Method,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [String]$URI,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
+        [Hashtable]$QueryStringParameters,
+
+        [Parameter(Mandatory = $false)]
         [ValidateNotNullOrEmpty()]
         [String]$Body,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [ValidateNotNullOrEmpty()]
         [System.Collections.IDictionary]$Headers
 
     )
 
-
-    # --- Grab the SessionState variable Test for connection variable
-    if (!$Script:OTSConnectionInformation) {
-
-        throw "Could not find OTSConnectionInformation. Please run Set-OTSConnectionInformation first"
-
-    }
-
-    # --- Base URI
-    $BaseURI = "https://onetimesecret.com/api"
-
-    # --- Create Invoke-RestMethod Parameters
-    $FullURI = "$($BaseUri)$($URI)"
-
-    $Headers = @{
-
-        "Authorization" = "Basic $($Script:OTSConnectionInformation.Authorization)"
-    }
-
     try {
 
-        Write-Verbose -Message "Invoking request with headers $($Headers)"
+        # --- Grab the SessionState variable Test for connection variable
+        if (!$Script:OTSConnectionInformation) {
 
+            throw "Could not find OTSConnectionInformation. Please run Set-OTSConnectionInformation first"
+        }
+
+        # --- Build Uri
+        $BaseURI = "https://onetimesecret.com/"
+        $UriBuilder = [System.UriBuilder]::new($BaseURI)
+        $UriBuilder.Path = "api/$URI"
+
+        # --- Add query parameters
+        $QueryString = [System.Web.HttpUtility]::ParseQueryString([string]::Empty)
+        if ($PSBoundParameters.ContainsKey("QueryStringParameters")) {
+            foreach ($Parameter in $QueryStringParameters.GetEnumerator()) {
+                $QueryString.Add($Parameter.Key, $Parameter.Value)
+            }
+        }
+
+        $UriBuilder.Query = $QueryString.ToString()
+
+        # --- Get full Uri
+        $FullURI = $UriBuilder.Uri
+
+        # --- Build headers
+        $Headers = @{
+
+            "Authorization" = "Basic $($Script:OTSConnectionInformation.Authorization)"
+        }
+
+        Write-Verbose -Message "Invoking request with headers $($Headers)"
         if ($PSBoundParameters.ContainsKey("Body")) {
 
             $Response = Invoke-RestMethod -Method $Method -Headers $Headers -Uri $FullURI -Body $Body -Verbose:$VerbosePrefernce
@@ -85,7 +98,7 @@ function InvokeOTSRestMethod {
         }
 
     }
-    catch [Exception]{
+    catch [Exception] {
 
         throw $_
 

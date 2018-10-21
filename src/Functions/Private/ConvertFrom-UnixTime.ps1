@@ -1,4 +1,4 @@
-function ConvertFromUnixTime {
+function ConvertFrom-UnixTime {
 <#
     .SYNOPSIS
     Convert UNIX Time to a readable format
