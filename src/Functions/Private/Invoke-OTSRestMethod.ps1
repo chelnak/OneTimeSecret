@@ -28,9 +28,7 @@ function Invoke-OTSRestMethod {
     System.Management.Automation.PSObject
 
     .EXAMPLE
-    InvokeOTSRestMethod -Method POST -URI /v1/generate
-
-    ?passphrase=1234"
+    InvokeOTSRestMethod -Method POST -URI /v1/generate?passphrase=1234"
 
     .EXAMPLE
     $QueryStringParameters = @{
@@ -89,7 +87,8 @@ function Invoke-OTSRestMethod {
 
         # --- Get full Uri
         $FullURI = $UriBuilder.Uri
-
+        Write-Host $FullUri
+        
         # --- Build headers
         $Headers = @{
 
@@ -108,6 +107,8 @@ function Invoke-OTSRestMethod {
 
         }
 
+        Write-Output $Response
+
     }
     catch [Exception] {
 
@@ -116,14 +117,13 @@ function Invoke-OTSRestMethod {
     }
     finally {
 
-        if ($PSVersionTable.PSEdition -eq "Desktop") {
-            $ServicePoint = [System.Net.ServicePointManager]::FindServicePoint("$($UriBuilder.Scheme)://$($UriBuilder.Host)")
+        if (($PSVersionTable.PSEdition -eq "Desktop") -and $Script:OTSConnectionInformation) {
+            $ServicePoint = "$($UriBuilder.Scheme)://$($UriBuilder.Host)"
+            $ServicePoint = [System.Net.ServicePointManager]::FindServicePoint($ServicePoint)
             $ServicePoint.CloseConnectionGroup("") | Out-Null
 
         }
 
     }
-
-    Write-Output $Response
 
 }
