@@ -87,8 +87,7 @@ function Invoke-OTSRestMethod {
 
         # --- Get full Uri
         $FullURI = $UriBuilder.Uri
-        Write-Host $FullUri
-        
+                
         # --- Build headers
         $Headers = @{
 
