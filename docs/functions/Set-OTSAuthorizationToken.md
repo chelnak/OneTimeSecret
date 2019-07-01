@@ -6,7 +6,7 @@ Create the Authorization information required to interact with the OneTimeSecret
 ## SYNTAX
 
 ```
-Set-OTSAuthorizationToken [-Username] <String> [-APIKey] <String> [-WhatIf] [-Confirm]
+Set-OTSAuthorizationToken [-Username] <String> [-APIKey] <String> [-BaseUrl] <String> [-WhatIf] [-Confirm]
 ```
 
 ## DESCRIPTION
@@ -17,6 +17,11 @@ Create the Authorization information required to interact with the OneTimeSecret
 ### -------------------------- EXAMPLE 1 --------------------------
 ```
 Set-OTSAuthorizationToken -Username user@mail.com -APIKey 52302308erf2e799affd33cbc7c85896b4c6a6997
+```
+
+### -------------------------- EXAMPLE 2 --------------------------
+```
+Set-OTSAuthorizationToken -Username user@mail.com -APIKey 52302308erf2e799affd33cbc7c85896b4c6a6997 -BaseUrl https://mycustomhost.com/
 ```
 
 ## PARAMETERS
@@ -46,6 +51,21 @@ Aliases:
 
 Required: True
 Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -BaseUrl
+Use a custom instance of onetimesecret
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases: 
+
+Required: True
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

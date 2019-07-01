@@ -1,3 +1,5 @@
+Add-Type -AssemblyName System.Web -ErrorAction SilentlyContinue
+
 $Private = Get-ChildItem -Path "$($PSScriptRoot)\Functions\Private\*.ps1" -Verbose:$VerbosePreference
 $Public = Get-ChildItem -Path "$($PSScriptRoot)\Functions\Public\*.ps1" -Verbose:$VerbosePreference
 
