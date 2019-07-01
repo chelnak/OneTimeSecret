@@ -20,7 +20,7 @@ function Test-WebAddress {
 
     try {
             $URI = $Address -as [System.URI]
-            $null -ne $URI.AbsoluteURI -and ($URI.Scheme -match 'http|https')
+            $null -ne $URI.AbsoluteURI -and (($URI.Scheme -eq "http") -or ($URI.Scheme -eq "https"))
     }
     catch {
         Write-Error -Message "$_" -ErrorAction Stop
