@@ -56,7 +56,7 @@ function Set-OTSAuthorizationToken {
 
             if ($PSBoundParameters.ContainsKey("BaseUrl")){
                 if (!(Test-WebAddress -Address $BaseUrl)) {
-                    Write-Error -Message "The url provided was not valid: $BaseUrl"
+                    Write-Error -Message "The url provided was not valid: $BaseUrl" -ErrorAction Stop
                 }
 
                 if (!$BaseUrl.EndsWith("/")) {
