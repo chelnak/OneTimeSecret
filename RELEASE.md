@@ -1,6 +1,2 @@
-## Fixes / Improvements
-* Fixed #7
-* ConvertFromUnixTime renamed to ConvertFrom-UnixTime
-* InvokeOTSRestMethod renamed to Invoke-OTSRestMethod
-* Enhanced the way query string parameters are handled
-* Build improvements
+# Fixes / Improvements
+* Adds support for custom base url to address #8

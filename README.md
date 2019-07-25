@@ -15,6 +15,10 @@ Before using any of the commands you will need to run Set-OTSAuthorizationToken 
 
 `Set-OTSAuthorizationToken -Username user@mail.com -APIKey xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
 
+It is also possible to use this module against a private instance of one time secret.
+
+`Set-OTSAuthorizationToken -Username user@mail.com -APIKey xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -BaseUrl https://mycustomhost.com/`
+
 You can view your authorization token at any time with the following command:
 
 `Get-OTSAuthorizationToken`

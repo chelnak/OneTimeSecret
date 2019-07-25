@@ -71,8 +71,12 @@ function Invoke-OTSRestMethod {
         }
 
         # --- Build Uri
-        $BaseURI = "https://onetimesecret.com/"
-        $UriBuilder = [System.UriBuilder]::new($BaseURI)
+        $BaseUrl = $Script:OTSConnectionInformation.BaseUrl
+        if (!$BaseUrl) {
+            $BaseUrl = "https://onetimesecret.com/"
+        }
+
+        $UriBuilder = [System.UriBuilder]::new($BaseUrl)
         $UriBuilder.Path = "api/$URI"
 
         # --- Add query parameters
