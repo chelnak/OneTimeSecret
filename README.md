@@ -1,4 +1,5 @@
-[![Build Status](https://craigg.visualstudio.com/PowerShell%20Module%20Pipelines/_apis/build/status/OneTimeSecret)](https://craigg.visualstudio.com/PowerShell%20Module%20Pipelines/_build/latest?definitionId=14)
+![Process PS Module](https://github.com/chelnak/OneTimeSecret/actions/workflows/ci.yml/badge.svg) ![](https://img.shields.io/powershellgallery/v/OneTimeSecret) ![](https://img.shields.io/powershellgallery/dt/OneTimeSecret)
+
 # OneTimeSecret
 
 A PowerShell module for OneTimeSecret.com
@@ -23,7 +24,7 @@ You can view your authorization token at any time with the following command:
 
 `Get-OTSAuthorizationToken`
 
-View documentation on ReadTheDocs.com [here](http://onetimesecret.readthedocs.io/en/latest/)
+View documentation on [here](https://chelnak.github.io/OneTimeSecret/)
 
 ## Contribute
 
