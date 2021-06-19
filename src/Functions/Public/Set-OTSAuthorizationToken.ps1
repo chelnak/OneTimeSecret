@@ -13,7 +13,7 @@ function Set-OTSAuthorizationToken {
     The API key for the account
 
     .PARAMETER BaseUrl
-    Use a custom instance of onetimesecret
+    Use a custom instance of onetimesecret. Defaults to https://onetimesecret.com/
 
     .INPUTS
     System.String
@@ -40,9 +40,9 @@ function Set-OTSAuthorizationToken {
         [ValidateNotNullOrEmpty()]
         [String]$APIKey,
 
-        [Parameter(Mandatory=$true, Position=2)]
+        [Parameter(Mandatory=$false, Position=2)]
         [ValidateNotNullOrEmpty()]
-        [String]$BaseUrl
+        [String]$BaseUrl = "https://onetimesecret.com/"
     )
 
     if ($PSCmdlet.ShouldProcess("onetimesecret")){
