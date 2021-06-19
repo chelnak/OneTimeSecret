@@ -1,0 +1,5 @@
+site_name: OneTimeSecret Documentation
+site_url: https://chelnak.github.io/OneTimeSecret/
+
+theme:
+  name: material
