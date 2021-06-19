@@ -67,6 +67,31 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           files: "tools/testResults.xml"
 
+  publish_docs:
+
+    name: "Publish Docs to GitHub Pages"
+    if: ${{ github.ref == 'refs/heads/master' }}
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Install mkdocs-material
+        run: pip install mkdocs-material
+
+      - name: Run mkdocs
+        run: mkdocs gh-deploy --force
+
   prod_release:
 
     name: Release module
