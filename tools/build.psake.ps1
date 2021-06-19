@@ -61,24 +61,15 @@ Task Analyze {
 
 Task ExecuteTest {
 
-    # --- Run Tests. Currently limited to help tests
-    $Timestamp = Get-date -uformat "%Y%m%d-%H%M%S"
-    $TestFile = "TEST_PS$PSVersion`_$TimeStamp.xml"
-    $Parameters = @{
-        Script = "$ENV:BHProjectPath\tests\OneTimeSecret.Help.Tests.ps1"
-        PassThru = $true
-        OutputFormat = 'NUnitXml'
-        OutputFile = "$ENV:BHProjectPath\$TestFile"
-    }
+    $config = [PesterConfiguration]::Default
+    $config.CodeCoverage.Enabled = $false
+    $config.TestResult.Enabled = $true
+    $config.TestResult.OutputFormat = 'JUnitXml'
+    $config.Output.Verbosity = 'Detailed'
+    $config.Run.Path = "$ENV:BHProjectPath\tests\OneTimeSecret.Help.Tests.ps1"
+    $config.Run.Exit = $true
+    Invoke-Pester -Configuration $config
 
-    Push-Location
-    Set-Location -Path $ENV:BHProjectPath
-    $TestResults = Invoke-Pester @Parameters
-    Pop-Location
-
-    if ($TestResults.FailedCount -gt 0) {
-        Write-Error "Failed '$($TestResults.FailedCount)' tests, build failed"
-    }
 }
 
 ###############
