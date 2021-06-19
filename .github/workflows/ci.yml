@@ -40,7 +40,7 @@ jobs:
           configFilePath: GitVersion.yml
 
       - name: Execute Build
-        run: tools/build.ps1
+        run: tools/build.ps1 -Task BuildWithTests
         shell: pwsh
 
       - name: Upload Release artifact

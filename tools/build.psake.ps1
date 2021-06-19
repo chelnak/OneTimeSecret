@@ -1,3 +1,10 @@
+using namespace System.Management.Automation.Language
+#Requires -Modules @{ModuleName="PSake"; RequiredVersion="4.9.0"},@{ModuleName="PSScriptAnalyzer"; RequiredVersion="1.19.1"},@{ModuleName="BuildHelpers"; RequiredVersion="2.0.16"}
+#Requires -Modules @{ModuleName="Pester"; RequiredVersion="5.2.1"},@{ModuleName="platyPS"; RequiredVersion="0.14.1"}
+
+Write-Host "Module versions are:"
+Get-Module -Name Psake,PSScriptAnalyzer,BuildHelpers,Pester,platyPS
+
 # --- Dot source build.settings.ps1
 . $PSScriptRoot\build.settings.ps1
 
@@ -7,8 +14,9 @@ properties {
 
 # --- Define the build tasks
 Task Default -depends Build
-Task Test -depends Init, Analyze, ExecuteTest
-Task Build -depends Test, UpdateModuleManifest, CreateArtifact, CreateArchive
+Task Build -depends Lint, UpdateModuleManifest, CreateArtifact, CreateArchive
+Task BuildWithTests -depends Init, Build, ExecuteTest, UpdateDocumentation
+
 Task Init {
 
     Write-Output "Build System Details:"
@@ -18,11 +26,7 @@ Task Init {
     Write-Output "ScriptAnalyzerSeverityLevel: $($ScriptAnalysisFailBuildOnSeverityLevel)"
 }
 
-##############
-# Task: Test #
-##############
-
-Task Analyze {
+Task Lint {
 
     $Results = Invoke-ScriptAnalyzer -Path $ENV:BHModulePath -Recurse -Settings $ScriptAnalyzerSettingsPath -Verbose:$VerbosePreference
     $Results | Select-Object RuleName, Severity, ScriptName, Line, Message | Format-List
@@ -59,31 +63,19 @@ Task Analyze {
 
 }
 
-Task ExecuteTest {
-
-    $config = [PesterConfiguration]::Default
-    $config.CodeCoverage.Enabled = $false
-    $config.TestResult.Enabled = $true
-    $config.TestResult.OutputFormat = 'JUnitXml'
-    $config.Output.Verbosity = 'Detailed'
-    $config.Run.Path = "$ENV:BHProjectPath\tests\OneTimeSecret.Help.Tests.ps1"
-    $config.Run.Exit = $true
-    Invoke-Pester -Configuration $config
-
-}
-
-###############
-# Task: Build #
-###############
-
 Task UpdateModuleManifest {
 
     $PublicFunctions = Get-ChildItem -Path "$($ENV:BHModulePath)\Functions\Public" -Filter "*.ps1" -Recurse | Sort-Object
 
+    Write-Output "PublicFunctions are: $PublicFunctions"
+
     $ExportFunctions = @()
+    $script:ExportAliases = @()
 
     foreach ($FunctionFile in $PublicFunctions) {
-        $AST = [System.Management.Automation.Language.Parser]::ParseFile($FunctionFile.FullName, [ref]$null, [ref]$null)        
+
+        # Find functions to export
+        $AST = [System.Management.Automation.Language.Parser]::ParseFile($FunctionFile.FullName, [ref]$null, [ref]$null)
         $Functions = $AST.FindAll({
             # --- Only export functions that contain a "-" and do not start with "int"
             $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] -and `
@@ -92,16 +84,30 @@ Task UpdateModuleManifest {
         },$true)
         if ($Functions.Name) {
             $ExportFunctions += $Functions.Name
-        }        
+        }
+
+        # Find aliases to export
+        $ParamBlock = $Ast.FindAll(
+            {
+                param($Item)
+                return ($Item -is [ParamBlockAst])
+            },
+            $true
+        )
+
+        $Aliases = $ParamBlock.Attributes | Where-Object {$_.TypeName.Name -eq 'Alias'}
+
+        if ($Aliases){
+            foreach ($Alias in $Aliases){
+
+                $script:ExportAliases += $Alias.PositionalArguments.Value
+            }
+        }
     }
 
-    Set-ModuleFunctions -Name $ENV:BHPSModuleManifest -FunctionsToExport $ExportFunctions -Verbose:$VerbosePreference
-
+    Set-ModuleFunction -Name $ENV:BHPSModuleManifest -FunctionsToExport ($ExportFunctions | Sort-Object) -Verbose
+    Set-ModuleAlias -Name $ENV:BHPSModuleManifest -AliasesToExport ($script:ExportAliases | Sort-Object) -Verbose
 }
-
-#################
-# Task: Release #
-#################
 
 Task CreateArtifact {
 
@@ -119,16 +125,9 @@ Task CreateArtifact {
     $ModuleManifestSource = Get-Item -Path $ENV:BHPSModuleManifest
     Copy-Item -Path $ModuleManifestSource.FullName -Destination "$($ReleaseDirectoryPath)\$($ModuleName).psd1" -Force
 
-    # --- Copy accross RELEASE.md
-    Write-Output "Copyying RELEASE.md"
-    $ReleaseNotes = Get-Item -Path "$($ENV:BHProjectPath)\RELEASE.md"
-    Copy-Item -Path $ReleaseNotes.FullName -Destination "$($ENV:BHProjectPath)\Release\RELEASE.md" -Force
-
     # --- Set the psd1 module version
-    if ($ENV:TF_BUILD){
-        $ModuleManifestVersion = $ENV:BUILD_BUILDNUMBER.Split("-")[0]
-    }
-    Update-Metadata -Path "$($ReleaseDirectoryPath)\$($ModuleName).psd1" -PropertyName ModuleVersion -Value $ModuleManifestVersion        
+    $ModuleManifestVersion = $ENV:GITVERSION_MajorMinorPatch
+    Update-Metadata -Path "$($ReleaseDirectoryPath)\$($ModuleName).psd1" -PropertyName ModuleVersion -Value $ModuleManifestVersion
 
     # --- Create an empty psm1 file
     Write-Output "Creating base PSM1 file"
@@ -158,15 +157,19 @@ $($Content)
     }
 
     Add-Content -Path $PSM1.FullName -Value $Body -Encoding UTF8
+
+    # Add export of aliases
+    if ($script:ExportAliases){
+
+        $AliasBody = "Export-ModuleMember -Alias " + ($script:ExportAliases -join ",")
+        Write-Output "Adding export alias content: $($AliasBody)"
+        Add-Content -Path $PSM1.FullName -Value $AliasBody -Encoding UTF8
+    }
 }
 
 Task CreateArchive {
 
-    $Destination = "$($ReleaseDirectoryPath).zip"    
-    
-    if ($ENV:TF_BUILD){
-        $Destination = "$($ReleaseDirectoryPath).$($ENV:BUILD_BUILDNUMBER).zip"
-    }
+    $Destination = "$($ReleaseDirectoryPath).$($ENV:GITVERSION_SemVer).zip"
 
     if (Test-Path -Path $Destination) {
         Remove-Item -Path $Destination -Force
@@ -176,14 +179,27 @@ Task CreateArchive {
     [IO.Compression.ZipFile]::CreateFromDirectory($ReleaseDirectoryPath, $Destination)
 }
 
+Task ExecuteTest {
+
+    $config = [PesterConfiguration]::Default
+    $config.CodeCoverage.Enabled = $false
+    $config.TestResult.Enabled = $true
+    $config.TestResult.OutputFormat = 'JUnitXml'
+    $config.Output.Verbosity = 'Detailed'
+    $config.Run.Path = "$ENV:BHProjectPath\tests\OneTimeSecret.Help.Tests.ps1"
+    $config.Run.Exit = $true
+    Invoke-Pester -Configuration $config
+}
+
 Task UpdateDocumentation {
-    
+
     Write-Output "Updating Markdown help"
-    $ModuleInfo = Import-Module $ENV:BHPSModuleManifest -Global -Force -PassThru
     $FunctionsPath = "$DocsDirectory\functions"
 
     Remove-Item -Path $FunctionsPath -Recurse -Force -ErrorAction SilentlyContinue
     New-Item $FunctionsPath -ItemType Directory | Out-Null
+
+    Import-Module -Name "$($ReleaseDirectoryPath)" -Global
 
     $PlatyPSParameters = @{
         Module = $ModuleName
@@ -196,28 +212,4 @@ Task UpdateDocumentation {
     # --- Ensure that index.md is present and up to date
     Write-Output "Updating index.md"
     Copy-Item -Path "$ENV:BHProjectPath\README.md" -Destination "$($DocsDirectory)\index.md" -Force -Verbose:$VerbosePreference | Out-Null
-
-    # --- Update mkdocs.yml with new functions
-    Write-Output "Updating mkdocs.yml"
-    $Mkdocs = "$ENV:BHProjectPath\mkdocs.yml"
-    $Functions = $ModuleInfo.ExportedCommands.Keys | ForEach-Object {"`n    - $($_) : functions/$($_).md"}
-
-    $Template = @"
----
-
-site_name: $($ModuleName)
-repo_url: $($RepositoryUrl)
-site_author: $($ModuleAuthor)
-edit_uri: edit/master/docs/
-theme: readthedocs
-copyright: "$($ModuleName) is licensed under the <a href='$($RepositoryUrl)/raw/master/LICENSE'>MIT license"
-pages:
-- 'Home' : 'index.md'
-- 'Change log' : 'CHANGELOG.md'
-- 'Build' : 'build.md'
-- 'Functions': $($Functions -join "`r")
-"@
-    
-    $Template | Set-Content -Path $Mkdocs -Force
-    
 }
