@@ -8,7 +8,7 @@ A PowerShell module for OneTimeSecret.com
 
 The OneTimeSecret module is available from the PowerShell Gallery:
 
-Install-Module -Name OneTimeSecret
+`Install-Module -Name OneTimeSecret`
 
 ## Usage
 

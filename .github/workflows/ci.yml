@@ -8,6 +8,7 @@ on:
       - tools/**
       - tests/**
       - .github/workflows/**
+      - README.md
     tags:
       - v*
   pull_request:
