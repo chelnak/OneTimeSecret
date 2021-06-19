@@ -2,7 +2,8 @@
     ExcludeRules=@(
         "PSAvoidUsingUserNameAndPassWordParams",
         "PSAvoidGlobalVars",
-        "PSAvoidUsingPlainTextForPassword"
+        "PSAvoidUsingPlainTextForPassword",
+        "PSUseProcessBlockForPipelineCommand"
     )
     
     Severity=@(
