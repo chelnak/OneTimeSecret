@@ -1,37 +1,46 @@
-Import-Module -Name $ENV:BHPSModuleManifest -Force -Global
+Describe "Module Manifest ->" {
 
-# --- Tests
-Describe "Help tests" {
-    
-    $functions = Get-Command -Module $ENV:BHProjectName -CommandType Function
+    It "has a valid module manifest" {
+        {Test-ModuleManifest -Path $ENV:BHProjectPath\Release\OneTimeSecret\OneTimeSecret.psd1} | Should -Not -Throw
+    }
 
-    foreach($Function in $Functions){
+}
 
-        $help = Get-Help $Function.name
+# --- Ensure that each function has valid help and parameter descriptions
+Describe "Function Help -> " {
 
-        Context $help.name {
+    $ModulePath = "$ENV:BHProjectPath\Release\OneTimeSecret\OneTimeSecret.psd1"
+    Import-Module $ModulePath -Force
 
-            it "Has a Synopsis" {
-                $help.synopsis | Should Not BeNullOrEmpty
-            }
+    $Functions = @(Get-Command -Module PowervRA -CommandType Function | ForEach-Object { @{Name = $_.Name } })
 
-            it "Has a description" {
-                $help.description | Should Not BeNullOrEmpty
-            }
+    It "<Name> has the required help entries" -TestCases $Functions {
+        Param(
+            [string]$Name
+        )
 
-            it "Has an example" {
-                 $help.examples | Should Not BeNullOrEmpty
-            }
+        $Help = Get-Help -Name $Name
 
-            foreach($parameter in $help.parameters.parameter) {
+        $Help.Synopsis | Should -Not -BeNullOrEmpty
+        $Help.Description | Should -Not -BeNullOrEmpty
+        $Help.Examples | Should -Not -BeNullOrEmpt
+    }
 
-                if($parameter -notmatch 'whatif|confirm') {
+    It "<Name> has documentation for all parameters" -TestCases $Functions {
+        Param(
+            [string]$Name
+        )
 
-                    it "Has a Parameter description for '$($parameter.name)'" {
-                        $parameter.Description.text | Should Not BeNullOrEmpty
-                    }
-                }
+        $Help = Get-Help -Name $Name
+
+        foreach ($Parameter in $Help.parameters.parameter) {
+            if ($Parameter -notmatch 'whatif|confirm') {
+                $Parameter.Description.text | Should -Not -BeNullOrEmpty
             }
         }
+    }
+
+    AfterAll {
+        Remove-Module -Name OneTimeSecret -Force
     }
 }
